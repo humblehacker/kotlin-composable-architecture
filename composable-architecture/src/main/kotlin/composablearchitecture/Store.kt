@@ -10,11 +10,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class Store<State, Action> private constructor(
+class Store<State, Action> constructor(
     initialState: State,
     private val reducer: (State, Action) -> Result<State, Action>,
     private val mainDispatcher: CoroutineDispatcher
@@ -63,12 +62,24 @@ class Store<State, Action> private constructor(
         return localStore
     }
 
+    // TODO: Should I keep this? It's only here to bring the API closer to the iOS version
+    fun <LocalState, LocalAction> scope(
+        state: Lens<State, LocalState>,
+        action: Prism<Action, LocalAction>
+    ): Store<LocalState, LocalAction> {
+        return scope(
+            toLocalState = state,
+            fromLocalAction = action,
+            coroutineScope = CoroutineScope(Dispatchers.Main)
+        )
+    }
+
     fun send(action: Action) {
         val currentThread = Thread.currentThread()
         require(
             currentThread.name.startsWith("main") || currentThread.name.contains("Test worker")
         ) {
-            "Sending actions from background threads is not allowed"
+            "Sending actions from background threads is not allowed. action: $action"
         }
 
         val (newState, effect) = reducer(mutableState.value, action)

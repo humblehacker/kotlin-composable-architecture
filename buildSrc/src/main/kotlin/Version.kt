@@ -12,6 +12,7 @@ val Project.androidxDynamicAnimationVersion: String get() = props.getProperty("a
 val Project.androidxEspressoVersion: String get() = props.getProperty("androidxEspressoVersion")
 val Project.androidxJunitVersion: String get() = props.getProperty("androidxJunitVersion")
 val Project.androidxLifecycleVersion: String get() = props.getProperty("androidxLifecycleVersion")
+val Project.androidxNavigationVersion: String get() = props.getProperty("androidxNavigationVersion")
 val Project.androidxRecyclerviewVersion: String get() = props.getProperty("androidxRecyclerviewVersion")
 val Project.arrowVersion: String get() = props.getProperty("arrowVersion")
 val Project.coroutinesVersion: String get() = props.getProperty("coroutinesVersion")
