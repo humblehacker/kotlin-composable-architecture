@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.Duration
 
 private val mutex = Mutex()
 private val cancellationJobs: MutableMap<Any, MutableSet<Job>> = mutableMapOf()
@@ -57,3 +58,9 @@ fun <State, Output> Result<State, Output>.cancellable(
     cancelInFlight: Boolean = false
 ): Result<State, Output> =
     Result(state, effect.cancellable(id, cancelInFlight))
+
+fun <State, Output> Result<State, Output>.debounce(
+    id: Any,
+    timeout: Duration
+): Result<State, Output> =
+    Result(state, effect.debounce(id, timeout))
