@@ -16,15 +16,28 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Immutable
 data class RootState(
+    val counter: CounterState = CounterState(),
     val optionalBasics: OptionalBasicsState = OptionalBasicsState()
 ) : Parcelable {
     companion object
 }
 
 sealed class RootAction {
+    class Counter(val action: CounterAction) : RootAction()
     class OptionalBasics(val action: OptionalBasicsAction) : RootAction()
 
     companion object {
+        val counterAction: Prism<RootAction, CounterAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is Counter -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                Counter(action = action)
+            }
+        )
         val optionalBasicsAction: Prism<RootAction, OptionalBasicsAction> = Prism(
             getOrModify = { rootAction ->
                 when (rootAction) {
@@ -43,11 +56,17 @@ data class RootEnvironment(val placeholder: Int = 0)
 
 fun RootEnvironment.live() = RootEnvironment()
 
-val rootReducer = Reducer<RootState, RootAction, RootEnvironment> { state, action, _ ->
-    when (action) {
-        else -> state.withNoEffect()
-    }
-}.combine(
+val rootReducer = Reducer.combine(
+    Reducer { state, action, _ ->
+        when (action) {
+            else -> state.withNoEffect()
+        }
+    },
+    counterReducer.pullback<RootState, RootAction, RootEnvironment>(
+        toLocalState = RootState.counter,
+        toLocalAction = RootAction.counterAction,
+        toLocalEnvironment = { CounterEnvironment() }
+    ),
     optionalBasicsReducer.pullback(
         toLocalState = RootState.optionalBasics,
         toLocalAction = RootAction.optionalBasicsAction,
