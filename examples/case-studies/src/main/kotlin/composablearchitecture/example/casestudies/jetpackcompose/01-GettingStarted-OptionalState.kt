@@ -1,9 +1,8 @@
 package composablearchitecture.example.casestudies.jetpackcompose
 
 import android.os.Parcelable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -19,6 +18,7 @@ import composablearchitecture.Store
 import composablearchitecture.android.IfLetStore
 import composablearchitecture.android.WithViewStore
 import composablearchitecture.withNoEffect
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.parcelize.Parcelize
 
 private val readMe by lazy {
@@ -88,9 +88,11 @@ val optionalBasicsReducer =
 fun OptionalBasicsView(store: Store<OptionalBasicsState, OptionalBasicsAction>) {
     WithViewStore(store) { viewStore ->
 
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Top) {
 
-            Text(readMe, style = MaterialTheme.typography.caption)
+            MarkdownText(readMe, style = MaterialTheme.typography.caption)
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Card(shape = RoundedCornerShape(10.dp)) {
                 Column {
@@ -113,11 +115,11 @@ fun OptionalBasicsView(store: Store<OptionalBasicsState, OptionalBasicsAction>) 
                                 action = OptionalBasicsAction.optionalCounterAction
                             ),
                             then = { store ->
-                                Text("`CounterState` is non-null")
+                                MarkdownText("`CounterState` is non-`null`")
                                 CounterView(store)
                             },
                             `else` = {
-                                Text("`CounterState` is null")
+                                MarkdownText("`CounterState` is `null`")
                             }
                         )
                     }
