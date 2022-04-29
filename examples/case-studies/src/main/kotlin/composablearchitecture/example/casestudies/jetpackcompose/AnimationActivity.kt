@@ -1,4 +1,4 @@
-package composablearchitecture.example.casestudies
+package composablearchitecture.example.casestudies.jetpackcompose
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -14,9 +14,9 @@ import androidx.lifecycle.lifecycleScope
 import composablearchitecture.Reducer
 import composablearchitecture.Result
 import composablearchitecture.Store
+import composablearchitecture.example.casestudies.R
 import composablearchitecture.example.casestudies.databinding.MainActivityBinding
 import composablearchitecture.withNoEffect
-import kotlinx.coroutines.flow.collect
 
 data class EventWrapper(
     val x: Float = 0F,
@@ -85,7 +85,9 @@ class AnimationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding = DataBindingUtil.setContentView<MainActivityBinding>(this, R.layout.main_activity)
+        val binding = DataBindingUtil.setContentView<MainActivityBinding>(this,
+            R.layout.main_activity
+        )
         val imageView = binding.animationImageView
 
         imageView.setOnTouchListener { view, event ->

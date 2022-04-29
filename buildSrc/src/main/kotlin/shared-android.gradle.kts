@@ -29,6 +29,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+        getByName("debug") {
+            isDebuggable = true
+        }
     }
 
     @Suppress("UnstableApiUsage")
@@ -52,10 +55,22 @@ dependencies {
     implementation("androidx.core:core-ktx:$androidxCoreVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion")
     implementation("androidx.recyclerview:recyclerview:$androidxRecyclerviewVersion")
-    implementation("io.arrow-kt:arrow-optics:$arrowVersion")
+
+    // Jetpack Compose
+    implementation("androidx.activity:activity-compose:$androidxActivityVersion")
+    implementation("androidx.compose.foundation:foundation:$kotlinComposeVersion")
+    implementation("androidx.compose.material:material:$kotlinComposeVersion")
+    implementation("androidx.compose.ui:ui-tooling:$kotlinComposeVersion")
+    implementation("androidx.compose.ui:ui:$kotlinComposeVersion")
+    implementation("androidx.navigation:navigation-compose:$androidxNavigationVersion")
+    implementation("androidx.navigation:navigation-runtime-ktx:$androidxNavigationVersion")
+
     implementation(project(":composable-architecture"))
     implementation(project(":composable-architecture-android"))
+
+    implementation("io.arrow-kt:arrow-optics:$arrowVersion")
     kapt("io.arrow-kt:arrow-meta:$arrowVersion")
+
     testImplementation("junit:junit:$junitVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testImplementation(project(":composable-architecture-test"))
