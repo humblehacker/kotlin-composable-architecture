@@ -1,14 +1,8 @@
 package composablearchitecture
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flattenConcat
-import kotlinx.coroutines.flow.flattenMerge
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlin.time.Duration
 
 class Effect<Output>(internal var flow: Flow<Output>) {
 
@@ -28,6 +22,11 @@ class Effect<Output>(internal var flow: Flow<Output>) {
 
     fun merge(vararg effects: Effect<Output>) {
         flow = flowOf(flow, *effects.map { it.flow }.toTypedArray()).flattenMerge()
+    }
+
+    fun debounce(id: Any, timeout: Duration): Effect<Output> {
+        return Effect(flow.onStart { delay(timeout) })
+            .cancellable(id, cancelInFlight = true)
     }
 
     suspend fun sink(): List<Output> {
