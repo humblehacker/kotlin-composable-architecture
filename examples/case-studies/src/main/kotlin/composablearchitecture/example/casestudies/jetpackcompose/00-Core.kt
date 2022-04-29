@@ -17,13 +17,15 @@ import kotlinx.parcelize.Parcelize
 @Immutable
 data class RootState(
     val counter: CounterState = CounterState(),
-    val optionalBasics: OptionalBasicsState = OptionalBasicsState()
+    val optionalBasics: OptionalBasicsState = OptionalBasicsState(),
+    val twoCounters: TwoCountersState = TwoCountersState(),
 ) : Parcelable {
     companion object
 }
 
 sealed class RootAction {
     class Counter(val action: CounterAction) : RootAction()
+    class TwoCounters(val action: TwoCountersAction) : RootAction()
     class OptionalBasics(val action: OptionalBasicsAction) : RootAction()
 
     companion object {
@@ -36,6 +38,17 @@ sealed class RootAction {
             },
             reverseGet = { action ->
                 Counter(action = action)
+            }
+        )
+        val twoCountersAction: Prism<RootAction, TwoCountersAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is TwoCounters -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                TwoCounters(action = action)
             }
         )
         val optionalBasicsAction: Prism<RootAction, OptionalBasicsAction> = Prism(
@@ -66,6 +79,11 @@ val rootReducer = Reducer.combine(
         toLocalState = RootState.counter,
         toLocalAction = RootAction.counterAction,
         toLocalEnvironment = { CounterEnvironment() }
+    ),
+    twoCountersReducer.pullback(
+        toLocalState = RootState.twoCounters,
+        toLocalAction = RootAction.twoCountersAction,
+        toLocalEnvironment = { TwoCountersEnvironment() }
     ),
     optionalBasicsReducer.pullback(
         toLocalState = RootState.optionalBasics,

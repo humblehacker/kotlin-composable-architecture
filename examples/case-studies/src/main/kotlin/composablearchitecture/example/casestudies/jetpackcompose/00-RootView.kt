@@ -37,6 +37,15 @@ fun RootView(store: ComposableStore<RootState, RootAction>) {
             )
         }
 
+        composable(CaseStudy.TwoCounters.route) {
+            TwoCountersView(
+                store.scope(
+                    state = RootState.twoCounters,
+                    action = RootAction.twoCountersAction
+                )
+            )
+        }
+
         composable(CaseStudy.OptionalState.route) {
             OptionalBasicsView(
                 store.scope(
@@ -68,6 +77,10 @@ private fun CaseStudiesView(navController: NavHostController) {
 
                     Divider(color = Color.LightGray, thickness = 0.5.dp)
 
+                    CaseStudyItem(caseStudy = CaseStudy.TwoCounters, navController = navController)
+
+                    Divider(color = Color.LightGray, thickness = 0.5.dp)
+
                     CaseStudyItem(caseStudy = CaseStudy.OptionalState, navController = navController)
                 }
             }
@@ -84,5 +97,6 @@ fun CaseStudyItem(caseStudy: CaseStudy, navController: NavController) {
 
 sealed class CaseStudy(val navTitle: String, val viewTitle: String, val route: String) {
     object Basics : CaseStudy("Basics", "Counter Demo", "01.getting-started.counter")
+    object TwoCounters : CaseStudy("Pullback and combine", "Two counter Demo", "01.getting_started.composition.two_counters")
     object OptionalState : CaseStudy("Optional State", "Optional state", "01.getting_started.optional_state")
 }
