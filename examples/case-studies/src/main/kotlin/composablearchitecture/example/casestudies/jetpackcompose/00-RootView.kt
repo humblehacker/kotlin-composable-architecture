@@ -11,8 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -25,7 +23,7 @@ fun RootView(store: ComposableStore<RootState, RootAction>) {
     NavHost(navController, startDestination = "case-studies") {
 
         composable("case-studies") {
-            CaseStudiesView(navController)
+            CaseStudiesView { navController.navigate(it) }
         }
 
         composable(CaseStudy.Basics.route) {
@@ -46,6 +44,15 @@ fun RootView(store: ComposableStore<RootState, RootAction>) {
             )
         }
 
+        composable(CaseStudy.BindingsBasics.route) {
+            BindingBasicsView(
+                store.scope(
+                    state = RootState.bindingBasics,
+                    action = RootAction.bindingBasicsAction
+                )
+            )
+        }
+
         composable(CaseStudy.OptionalState.route) {
             OptionalBasicsView(
                 store.scope(
@@ -58,7 +65,7 @@ fun RootView(store: ComposableStore<RootState, RootAction>) {
 }
 
 @Composable
-private fun CaseStudiesView(navController: NavHostController) {
+private fun CaseStudiesView(navigateTo: (route: String) -> Unit) {
     Scaffold(topBar = {
         TopAppBar(title = { Text(text = "Case Studies") })
     }, backgroundColor = Color(0xF0F0F0FF)) {
@@ -73,15 +80,19 @@ private fun CaseStudiesView(navController: NavHostController) {
 
                 Column(Modifier.verticalScroll(rememberScrollState())) {
 
-                    CaseStudyItem(caseStudy = CaseStudy.Basics, navController = navController)
+                    CaseStudyItem(CaseStudy.Basics, navigateTo)
 
                     Divider(color = Color.LightGray, thickness = 0.5.dp)
 
-                    CaseStudyItem(caseStudy = CaseStudy.TwoCounters, navController = navController)
+                    CaseStudyItem(CaseStudy.TwoCounters, navigateTo)
 
                     Divider(color = Color.LightGray, thickness = 0.5.dp)
 
-                    CaseStudyItem(caseStudy = CaseStudy.OptionalState, navController = navController)
+                    CaseStudyItem(CaseStudy.BindingsBasics, navigateTo)
+
+                    Divider(color = Color.LightGray, thickness = 0.5.dp)
+
+                    CaseStudyItem(CaseStudy.OptionalState, navigateTo)
                 }
             }
         }
@@ -89,14 +100,15 @@ private fun CaseStudiesView(navController: NavHostController) {
 }
 
 @Composable
-fun CaseStudyItem(caseStudy: CaseStudy, navController: NavController) {
-    TextButton(onClick = { navController.navigate(caseStudy.route) }) {
+fun CaseStudyItem(caseStudy: CaseStudy, navigateTo: (route: String) -> Unit) {
+    TextButton(onClick = { navigateTo(caseStudy.route) }) {
         Text(caseStudy.navTitle, style = MaterialTheme.typography.subtitle2)
     }
 }
 
 sealed class CaseStudy(val navTitle: String, val viewTitle: String, val route: String) {
     object Basics : CaseStudy("Basics", "Counter Demo", "01.getting-started.counter")
-    object TwoCounters : CaseStudy("Pullback and combine", "Two counter Demo", "01.getting_started.composition.two_counters")
-    object OptionalState : CaseStudy("Optional State", "Optional state", "01.getting_started.optional_state")
+    object TwoCounters : CaseStudy("Pullback and combine", "Two counter Demo", "01.getting-started.composition.two-counters")
+    object OptionalState : CaseStudy("Optional State", "Optional state", "01.getting-started.optional-state")
+    object BindingsBasics : CaseStudy("Bindings", "Bindings basics", "01.getting-started.bindings-basics")
 }
