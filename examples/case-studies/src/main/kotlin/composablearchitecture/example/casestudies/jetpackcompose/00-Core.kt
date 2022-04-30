@@ -2,16 +2,19 @@
 package composablearchitecture.example.casestudies.jetpackcompose
 
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import arrow.core.left
 import arrow.core.right
 import arrow.optics.Prism
 import arrow.optics.optics
 import composablearchitecture.Reducer
+import composablearchitecture.debug
 import composablearchitecture.withNoEffect
 import kotlinx.parcelize.Parcelize
 
 @optics
 @Parcelize
+@Immutable
 data class RootState(
     val optionalBasics: OptionalBasicsState = OptionalBasicsState()
 ) : Parcelable {
@@ -50,4 +53,4 @@ val rootReducer = Reducer<RootState, RootAction, RootEnvironment> { state, actio
         toLocalAction = RootAction.optionalBasicsAction,
         toLocalEnvironment = { OptionalBasicsEnvironment() }
     )
-)
+).debug()

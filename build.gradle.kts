@@ -32,3 +32,20 @@ allprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.buildDir)
 }
+
+subprojects {
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            if (project.findProperty("casestudies.enableComposeCompilerReports") == "true") {
+                freeCompilerArgs = listOf(
+                    "-P",
+                    "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
+                            project.buildDir.absolutePath + "/compose_metrics",
+                    "-P",
+                    "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
+                            project.buildDir.absolutePath + "/compose_metrics"
+                )
+            }
+        }
+    }
+}
