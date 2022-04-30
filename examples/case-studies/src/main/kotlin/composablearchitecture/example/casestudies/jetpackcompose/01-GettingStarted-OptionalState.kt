@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -14,7 +15,7 @@ import arrow.core.right
 import arrow.optics.Prism
 import arrow.optics.optics
 import composablearchitecture.Reducer
-import composablearchitecture.Store
+import composablearchitecture.android.ComposableStore
 import composablearchitecture.android.IfLetStore
 import composablearchitecture.android.WithViewStore
 import composablearchitecture.withNoEffect
@@ -36,6 +37,7 @@ Tapping "Toggle counter state" will flip between the `nil` and non-`nil` counter
 
 @optics
 @Parcelize
+@Immutable
 data class OptionalBasicsState(
     val optionalCounter: CounterState? = null
 ) : Parcelable {
@@ -85,7 +87,7 @@ val optionalBasicsReducer =
         )
 
 @Composable
-fun OptionalBasicsView(store: Store<OptionalBasicsState, OptionalBasicsAction>) {
+fun OptionalBasicsView(store: ComposableStore<OptionalBasicsState, OptionalBasicsAction>) {
     WithViewStore(store) { viewStore ->
 
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Top) {

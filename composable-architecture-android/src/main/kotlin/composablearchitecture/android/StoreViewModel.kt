@@ -7,7 +7,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
 import composablearchitecture.Reducer
-import composablearchitecture.Store
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -19,11 +18,11 @@ class StoreViewModel<State, Action, Environment>(
     private val handle: SavedStateHandle
 ) : ViewModel() {
 
-    var store: Store<State, Action>
+    var store: ComposableStore<State, Action>
 
     init {
         val state = handle.get("state") ?: initialState
-        store = Store(
+        store = ComposableStore(
             initialState = state,
             reducer = reducer,
             environment = environment,

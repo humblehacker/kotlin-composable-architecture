@@ -1,17 +1,17 @@
 package composablearchitecture.android
 
 import androidx.compose.runtime.*
-import composablearchitecture.Store
 
 @Composable
 fun <State : Any, Action> IfLetStore(
-    store: Store<State?, Action>,
-    then: (@Composable (store: Store<State, Action>) -> Unit),
+    store: ComposableStore<State?, Action>,
+    then: (@Composable (store: ComposableStore<State, Action>) -> Unit),
     `else`: (@Composable () -> Unit) = {}
 ) {
     WithViewStore(store = store) { viewStore ->
         if (viewStore.state != null) {
-            then(store as Store<State, Action>)
+            @Suppress("UNCHECKED_CAST")
+            then(store as ComposableStore<State, Action>)
         } else {
             `else`()
         }
@@ -20,6 +20,6 @@ fun <State : Any, Action> IfLetStore(
 
 @Composable
 fun <State : Any, Action> IfLetStore(
-    store: Store<State?, Action>,
-    then: (@Composable (store: Store<State, Action>) -> Unit)
+    store: ComposableStore<State?, Action>,
+    then: (@Composable (store: ComposableStore<State, Action>) -> Unit)
 ) = IfLetStore(store, then, {})
