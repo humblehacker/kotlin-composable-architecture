@@ -14,56 +14,53 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import composablearchitecture.android.StoreViewModel
-import composablearchitecture.android.WithViewStore
+import composablearchitecture.android.ComposableStore
 
 @Composable
-fun RootView(viewModel: StoreViewModel<RootState, RootAction, RootEnvironment>) {
+fun RootView(store: ComposableStore<RootState, RootAction>) {
 
     val navController = rememberNavController()
-    WithViewStore(store = viewModel.store) { viewStore ->
-        Scaffold(topBar = {
-            TopAppBar(title = { Text(text = "Case Studies") })
-        }) {
-            NavHost(navController, startDestination = "case-studies") {
+    Scaffold(topBar = {
+        TopAppBar(title = { Text(text = "Case Studies") })
+    }) {
+        NavHost(navController, startDestination = "case-studies") {
 
-                composable("case-studies") {
-                    Column(
-                        Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+            composable("case-studies") {
+                Column(
+                    Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
 
-                        Text("Getting started", style = MaterialTheme.typography.subtitle1)
+                    Text("Getting started", style = MaterialTheme.typography.subtitle1)
 
-                        Card(shape = RoundedCornerShape(10.dp)) {
+                    Card(shape = RoundedCornerShape(10.dp)) {
 
-                            Column(Modifier.verticalScroll(rememberScrollState())) {
+                        Column(Modifier.verticalScroll(rememberScrollState())) {
 
-                                TextButton(onClick = { }, enabled = false) {
-                                    Text("Basics", style = MaterialTheme.typography.subtitle2)
-                                }
+                            TextButton(onClick = { }, enabled = false) {
+                                Text("Basics", style = MaterialTheme.typography.subtitle2)
+                            }
 
-                                Divider(color = Color.LightGray, thickness = 0.5.dp)
+                            Divider(color = Color.LightGray, thickness = 0.5.dp)
 
-                                TextButton(onClick = { navController.navigate("01.getting-started.optional-state") }) {
-                                    Text(
-                                        "Optional state",
-                                        style = MaterialTheme.typography.subtitle2
-                                    )
-                                }
+                            TextButton(onClick = { navController.navigate("01.getting-started.optional-state") }) {
+                                Text(
+                                    "Optional state",
+                                    style = MaterialTheme.typography.subtitle2
+                                )
                             }
                         }
                     }
                 }
+            }
 
-                composable("01.getting-started.optional-state") {
-                    OptionalBasicsView(
-                        viewModel.store.scope(
-                            state = RootState.optionalBasics,
-                            action = RootAction.optionalBasicsAction
-                        )
+            composable("01.getting-started.optional-state") {
+                OptionalBasicsView(
+                    store.scope(
+                        state = RootState.optionalBasics,
+                        action = RootAction.optionalBasicsAction
                     )
-                }
+                )
             }
         }
     }
