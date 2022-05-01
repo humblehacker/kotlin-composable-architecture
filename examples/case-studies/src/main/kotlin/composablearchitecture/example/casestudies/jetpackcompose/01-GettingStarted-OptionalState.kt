@@ -1,7 +1,6 @@
 package composablearchitecture.example.casestudies.jetpackcompose
 
 import android.os.Parcelable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -87,43 +86,49 @@ val optionalBasicsReducer =
         )
 
 @Composable
-fun OptionalBasicsView(store: ComposableStore<OptionalBasicsState, OptionalBasicsAction>) {
+fun OptionalBasicsView(
+    title: String,
+    store: ComposableStore<OptionalBasicsState, OptionalBasicsAction>
+) {
     WithViewStore(store) { viewStore ->
+        Scaffold(topBar = {
+            TopAppBar(title = { Text(text = title) })
+        }, backgroundColor = Color(0xF0F0F0FF)) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Top) {
 
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Top) {
+                MarkdownText(readMe, style = MaterialTheme.typography.caption)
 
-            MarkdownText(readMe, style = MaterialTheme.typography.caption)
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Card(shape = RoundedCornerShape(10.dp)) {
+                    Column {
 
-            Card(shape = RoundedCornerShape(10.dp)) {
-                Column {
-
-                    Row {
-                        Button(
-                            modifier = Modifier.padding(8.dp),
-                            onClick = { viewStore.send(OptionalBasicsAction.ToggleCounterButtonTapped) }
-                        ) {
-                            Text("Toggle counter state")
-                        }
-                    }
-
-                    Divider(color = Color.LightGray, thickness = 0.5.dp)
-
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        IfLetStore(
-                            store.scope(
-                                state = OptionalBasicsState.nullableOptionalCounter,
-                                action = OptionalBasicsAction.optionalCounterAction
-                            ),
-                            then = { store ->
-                                MarkdownText("`CounterState` is non-`null`")
-                                CounterView(store)
-                            },
-                            `else` = {
-                                MarkdownText("`CounterState` is `null`")
+                        Row {
+                            Button(
+                                modifier = Modifier.padding(8.dp),
+                                onClick = { viewStore.send(OptionalBasicsAction.ToggleCounterButtonTapped) }
+                            ) {
+                                Text("Toggle counter state")
                             }
-                        )
+                        }
+
+                        Divider(color = Color.LightGray, thickness = 0.5.dp)
+
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            IfLetStore(
+                                store.scope(
+                                    state = OptionalBasicsState.nullableOptionalCounter,
+                                    action = OptionalBasicsAction.optionalCounterAction
+                                ),
+                                then = { store ->
+                                    MarkdownText("`CounterState` is non-`null`")
+                                    CounterView(store)
+                                },
+                                `else` = {
+                                    MarkdownText("`CounterState` is `null`")
+                                }
+                            )
+                        }
                     }
                 }
             }

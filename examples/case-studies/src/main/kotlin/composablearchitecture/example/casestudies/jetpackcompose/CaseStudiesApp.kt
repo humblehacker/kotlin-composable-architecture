@@ -1,13 +1,11 @@
 package composablearchitecture.example.casestudies.jetpackcompose
 
-import android.content.Context
 import androidx.compose.runtime.Composable
-import composablearchitecture.android.StoreViewModel
+import composablearchitecture.android.ComposableStore
 
 @Composable
 fun CaseStudiesApp(
-    context: Context,
-    viewModel: StoreViewModel<RootState, RootAction, RootEnvironment>
+    store: ComposableStore<RootState, RootAction>
 ) {
-    RootView(viewModel)
+    RootView(store)
 }
