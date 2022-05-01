@@ -84,9 +84,9 @@ val twoCountersReducer = Reducer.combine(
 )
 
 @Composable
-fun TwoCountersView(store: ComposableStore<TwoCountersState, TwoCountersAction>) {
+fun TwoCountersView(title: String, store: ComposableStore<TwoCountersState, TwoCountersAction>) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text(text = CaseStudy.TwoCounters.viewTitle) }) },
+        topBar = { TopAppBar(title = { Text(text = title) }) },
         backgroundColor = Color(0xF0F0F0FF)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Top) {

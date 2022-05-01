@@ -113,9 +113,12 @@ val bindingBasicsReducer =
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BindingBasicsView(store: ComposableStore<BindingBasicsState, BindingBasicsAction>) {
+fun BindingBasicsView(
+    title: String,
+    store: ComposableStore<BindingBasicsState, BindingBasicsAction>
+) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text(text = CaseStudy.BindingsBasics.viewTitle) }) },
+        topBar = { TopAppBar(title = { Text(text = title) }) },
         backgroundColor = Color(0xF0F0F0FF)
     ) {
         WithViewStore(store) { viewStore ->

@@ -86,10 +86,13 @@ val optionalBasicsReducer =
         )
 
 @Composable
-fun OptionalBasicsView(store: ComposableStore<OptionalBasicsState, OptionalBasicsAction>) {
+fun OptionalBasicsView(
+    title: String,
+    store: ComposableStore<OptionalBasicsState, OptionalBasicsAction>
+) {
     WithViewStore(store) { viewStore ->
         Scaffold(topBar = {
-            TopAppBar(title = { Text(text = CaseStudy.OptionalState.viewTitle) })
+            TopAppBar(title = { Text(text = title) })
         }, backgroundColor = Color(0xF0F0F0FF)) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Top) {
 

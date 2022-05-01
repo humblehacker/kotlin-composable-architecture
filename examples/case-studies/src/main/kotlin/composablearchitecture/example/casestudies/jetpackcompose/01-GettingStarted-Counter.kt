@@ -84,9 +84,9 @@ fun CounterView(
 }
 
 @Composable
-fun CounterDemoView(store: ComposableStore<CounterState, CounterAction>) {
+fun CounterDemoView(title: String, store: ComposableStore<CounterState, CounterAction>) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text(text = CaseStudy.Basics.viewTitle) }) },
+        topBar = { TopAppBar(title = { Text(text = title) }) },
         backgroundColor = Color(0xF0F0F0FF)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Top) {

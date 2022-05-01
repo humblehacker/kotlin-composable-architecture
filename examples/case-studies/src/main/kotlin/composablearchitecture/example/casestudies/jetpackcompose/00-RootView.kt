@@ -1,8 +1,6 @@
 package composablearchitecture.example.casestudies.jetpackcompose
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -10,56 +8,36 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import composablearchitecture.android.ComposableStore
+
+val backgroundColor = Color(0xF0F0F0FF)
 
 @Composable
 fun RootView(store: ComposableStore<RootState, RootAction>) {
 
     val navController = rememberNavController()
     NavHost(navController, startDestination = "case-studies") {
+        composable("case-studies") { CaseStudiesView { navController.navigate(it) } }
+        composable(gettingStartedCaseStudies, store)
+        composable(effectsCaseStudies, store)
+        composable(navigationCaseStudies, store)
+        composable(higherOrderReducersCaseStudies, store)
+    }
+}
 
-        composable("case-studies") {
-            CaseStudiesView { navController.navigate(it) }
-        }
-
-        composable(CaseStudy.Basics.route) {
-            CounterDemoView(
-                store.scope(
-                    state = RootState.counter,
-                    action = RootAction.counterAction
-                )
-            )
-        }
-
-        composable(CaseStudy.TwoCounters.route) {
-            TwoCountersView(
-                store.scope(
-                    state = RootState.twoCounters,
-                    action = RootAction.twoCountersAction
-                )
-            )
-        }
-
-        composable(CaseStudy.BindingsBasics.route) {
-            BindingBasicsView(
-                store.scope(
-                    state = RootState.bindingBasics,
-                    action = RootAction.bindingBasicsAction
-                )
-            )
-        }
-
-        composable(CaseStudy.OptionalState.route) {
-            OptionalBasicsView(
-                store.scope(
-                    state = RootState.optionalBasics,
-                    action = RootAction.optionalBasicsAction
-                )
-            )
+private fun NavGraphBuilder.composable(
+    caseStudies: List<CaseStudy>,
+    store: ComposableStore<RootState, RootAction>
+) {
+    caseStudies.forEach { caseStudy ->
+        composable(caseStudy.route) {
+            caseStudy.composable(store)
         }
     }
 }
@@ -68,47 +46,160 @@ fun RootView(store: ComposableStore<RootState, RootAction>) {
 private fun CaseStudiesView(navigateTo: (route: String) -> Unit) {
     Scaffold(topBar = {
         TopAppBar(title = { Text(text = "Case Studies") })
-    }, backgroundColor = Color(0xF0F0F0FF)) {
+    }, backgroundColor = backgroundColor) {
         Column(
-            Modifier.padding(16.dp),
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
-            Text("Getting started", style = MaterialTheme.typography.subtitle1)
-
-            Card(shape = RoundedCornerShape(10.dp)) {
-
-                Column(Modifier.verticalScroll(rememberScrollState())) {
-
-                    CaseStudyItem(CaseStudy.Basics, navigateTo)
-
-                    Divider(color = Color.LightGray, thickness = 0.5.dp)
-
-                    CaseStudyItem(CaseStudy.TwoCounters, navigateTo)
-
-                    Divider(color = Color.LightGray, thickness = 0.5.dp)
-
-                    CaseStudyItem(CaseStudy.BindingsBasics, navigateTo)
-
-                    Divider(color = Color.LightGray, thickness = 0.5.dp)
-
-                    CaseStudyItem(CaseStudy.OptionalState, navigateTo)
-                }
-            }
+            CaseStudiesGroup("Getting started", gettingStartedCaseStudies, navigateTo)
+            CaseStudiesGroup("Effects", effectsCaseStudies, navigateTo)
+            CaseStudiesGroup("Navigation", navigationCaseStudies, navigateTo)
+            CaseStudiesGroup("Higher-order reducers", higherOrderReducersCaseStudies, navigateTo)
         }
     }
 }
 
 @Composable
+private fun CaseStudiesGroup(
+    title: String,
+    caseStudies: List<CaseStudy>,
+    navigateTo: (route: String) -> Unit
+) {
+    Text(title, style = MaterialTheme.typography.subtitle1)
+
+    Card(shape = RoundedCornerShape(10.dp)) {
+
+        Column {
+
+            caseStudies.forEachIndexed { index, caseStudy ->
+
+                CaseStudyItem(caseStudy, navigateTo)
+
+                if (index < caseStudies.lastIndex)
+                    Divider(color = Color.LightGray, thickness = 0.5.dp)
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
 fun CaseStudyItem(caseStudy: CaseStudy, navigateTo: (route: String) -> Unit) {
     TextButton(onClick = { navigateTo(caseStudy.route) }) {
-        Text(caseStudy.navTitle, style = MaterialTheme.typography.subtitle2)
+        Text(
+            caseStudy.navTitle,
+            style = MaterialTheme.typography.subtitle2,
+            textAlign = TextAlign.Left,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
-sealed class CaseStudy(val navTitle: String, val viewTitle: String, val route: String) {
-    object Basics : CaseStudy("Basics", "Counter Demo", "01.getting-started.counter")
-    object TwoCounters : CaseStudy("Pullback and combine", "Two counter Demo", "01.getting-started.composition.two-counters")
-    object OptionalState : CaseStudy("Optional State", "Optional state", "01.getting-started.optional-state")
-    object BindingsBasics : CaseStudy("Bindings", "Bindings basics", "01.getting-started.bindings-basics")
+@Composable
+private fun NotYetImplementedView(title: String) {
+    Scaffold(topBar = {
+        TopAppBar(title = { Text(text = title) })
+    }, backgroundColor = backgroundColor) {
+        Text(
+            "Not yet implemented",
+            style = MaterialTheme.typography.h6,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentHeight()
+        )
+    }
 }
+
+val gettingStartedCaseStudies: List<CaseStudy> = listOf(
+    CaseStudy(
+        navTitle = "Basics",
+        route = "01.getting-started.counter",
+        composable = { store ->
+            CounterDemoView(
+                title = "Counter Demo",
+                store.scope(
+                    state = RootState.counter,
+                    action = RootAction.counterAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
+        navTitle = "Pullback and combine",
+        route = "01.getting-started.composition.two-counters",
+        composable = { store ->
+            TwoCountersView(
+                title = "Two counter Demo",
+                store.scope(
+                    state = RootState.twoCounters,
+                    action = RootAction.twoCountersAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
+        navTitle = "Optional State",
+        route = "01.getting-started.optional-state",
+        composable = { store ->
+            OptionalBasicsView(
+                title = "Optional state",
+                store.scope(
+                    state = RootState.optionalBasics,
+                    action = RootAction.optionalBasicsAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
+        navTitle = "Bindings",
+        route = "01.getting-started.bindings-basics",
+        composable = { store ->
+            BindingBasicsView(
+                title = "Bindings basics",
+                store.scope(
+                    state = RootState.bindingBasics,
+                    action = RootAction.bindingBasicsAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
+        navTitle = "Form Bindings",
+        route = "01.getting-started.bindings.forms",
+        composable = { NotYetImplementedView(title = "Bindings form") }
+    )
+)
+
+val effectsCaseStudies: List<CaseStudy> = listOf(
+    CaseStudy(
+        navTitle = "Basics",
+        route = "01.effects.basic",
+        composable = { NotYetImplementedView(title = "Basics") }
+    )
+)
+
+val navigationCaseStudies: List<CaseStudy> = listOf(
+    CaseStudy(
+        navTitle = "Navigate and load data",
+        route = "01.navigation.navigate-and-load",
+        composable = { NotYetImplementedView(title = "Navigate and load") }
+    )
+)
+
+val higherOrderReducersCaseStudies: List<CaseStudy> = listOf(
+    CaseStudy(
+        navTitle = "Reusable favoriting component",
+        route = "01.higher-order-reducers.reusable-favoriting",
+        composable = { NotYetImplementedView(title = "Favoriting") }
+    )
+)
+
+data class CaseStudy(
+    val navTitle: String,
+    val route: String,
+    val composable: @Composable (store: ComposableStore<RootState, RootAction>) -> Unit
+)
