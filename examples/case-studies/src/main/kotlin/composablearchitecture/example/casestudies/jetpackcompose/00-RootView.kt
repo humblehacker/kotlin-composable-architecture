@@ -11,23 +11,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import composablearchitecture.android.ComposableStore
 
 val backgroundColor = Color(0xF0F0F0FF)
 
 @Composable
-fun RootView(store: ComposableStore<RootState, RootAction>) {
+fun RootView(navController: NavHostController, store: ComposableStore<RootState, RootAction>) {
 
-    val navController = rememberNavController()
     NavHost(navController, startDestination = "case-studies") {
         composable("case-studies") { CaseStudiesView { navController.navigate(it) } }
         composable(gettingStartedCaseStudies, store)
         composable(effectsCaseStudies, store)
         composable(navigationCaseStudies, store)
         composable(higherOrderReducersCaseStudies, store)
+
+        loadThenNavigateGraph(
+            store = store.scope(
+                state = RootState.loadThenNavigate,
+                action = RootAction.loadThenNavigateAction
+            )
+        )
     }
 }
 
@@ -184,9 +190,17 @@ val effectsCaseStudies: List<CaseStudy> = listOf(
 
 val navigationCaseStudies: List<CaseStudy> = listOf(
     CaseStudy(
-        navTitle = "Navigate and load data",
-        route = "01.navigation.navigate-and-load",
-        composable = { NotYetImplementedView(title = "Navigate and load") }
+        navTitle = "Load data then navigate",
+        route = "03.navigation.load-then-navigate",
+        composable = { store ->
+            LoadThenNavigateView(
+                title = "Load then navigate",
+                store = store.scope(
+                    state = RootState.loadThenNavigate,
+                    action = RootAction.loadThenNavigateAction
+                )
+            )
+        }
     )
 )
 

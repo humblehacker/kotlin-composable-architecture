@@ -18,6 +18,7 @@ import kotlinx.parcelize.Parcelize
 data class RootState(
     val bindingBasics: BindingBasicsState = BindingBasicsState(),
     val counter: CounterState = CounterState(),
+    val loadThenNavigate: LoadThenNavigateState = LoadThenNavigateState(),
     val optionalBasics: OptionalBasicsState = OptionalBasicsState(),
     val twoCounters: TwoCountersState = TwoCountersState(),
 ) : Parcelable {
@@ -27,13 +28,15 @@ data class RootState(
 sealed class RootAction {
     class BindingBasics(val action: BindingBasicsAction) : RootAction()
     class Counter(val action: CounterAction) : RootAction()
-    class TwoCounters(val action: TwoCountersAction) : RootAction()
+    class NavigateAndLoad(val action: LoadThenNavigateAction) : RootAction()
     class OptionalBasics(val action: OptionalBasicsAction) : RootAction()
+    class TwoCounters(val action: TwoCountersAction) : RootAction()
 
     override fun toString(): String {
         return when (this) {
             is BindingBasics -> "RootAction.BindingBasics(action=$action)"
             is Counter -> "RootAction.Counter(action=$action)"
+            is NavigateAndLoad -> "RootAction.NavigateAndLoad(action=$action)"
             is OptionalBasics -> "RootAction.OptionalBasics(action=$action)"
             is TwoCounters -> "RootAction.TwoCounters(action=$action)"
         }
@@ -62,15 +65,15 @@ sealed class RootAction {
                 Counter(action = action)
             }
         )
-        val twoCountersAction: Prism<RootAction, TwoCountersAction> = Prism(
+        val loadThenNavigateAction: Prism<RootAction, LoadThenNavigateAction> = Prism(
             getOrModify = { rootAction ->
                 when (rootAction) {
-                    is TwoCounters -> rootAction.action.right()
+                    is NavigateAndLoad -> rootAction.action.right()
                     else -> rootAction.left()
                 }
             },
             reverseGet = { action ->
-                TwoCounters(action = action)
+                NavigateAndLoad(action = action)
             }
         )
         val optionalBasicsAction: Prism<RootAction, OptionalBasicsAction> = Prism(
@@ -82,6 +85,17 @@ sealed class RootAction {
             },
             reverseGet = { action ->
                 OptionalBasics(action = action)
+            }
+        )
+        val twoCountersAction: Prism<RootAction, TwoCountersAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is TwoCounters -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                TwoCounters(action = action)
             }
         )
     }
@@ -107,14 +121,19 @@ val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
         toLocalAction = RootAction.counterAction,
         toLocalEnvironment = { CounterEnvironment() }
     ),
-    twoCountersReducer.pullback(
-        toLocalState = RootState.twoCounters,
-        toLocalAction = RootAction.twoCountersAction,
-        toLocalEnvironment = { TwoCountersEnvironment() }
+    loadThenNavigateReducer.pullback(
+        toLocalState = RootState.loadThenNavigate,
+        toLocalAction = RootAction.loadThenNavigateAction,
+        toLocalEnvironment = { LoadThenNavigateEnvironment() }
     ),
     optionalBasicsReducer.pullback(
         toLocalState = RootState.optionalBasics,
         toLocalAction = RootAction.optionalBasicsAction,
         toLocalEnvironment = { OptionalBasicsEnvironment() }
-    )
+    ),
+    twoCountersReducer.pullback(
+        toLocalState = RootState.twoCounters,
+        toLocalAction = RootAction.twoCountersAction,
+        toLocalEnvironment = { TwoCountersEnvironment() }
+    ),
 ).debug()

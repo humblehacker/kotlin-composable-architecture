@@ -64,11 +64,13 @@ val counterReducer = Reducer<CounterState, CounterAction, CounterEnvironment> { 
 fun CounterView(
     store: ComposableStore<CounterState, CounterAction>,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
+    modifier: Modifier = Modifier
 ) {
     WithViewStore(store) { viewStore ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = horizontalArrangement
+            horizontalArrangement = horizontalArrangement,
+            modifier = modifier
         ) {
             Button(onClick = { viewStore.send(CounterAction.DecrementButtonTapped) }) { Text("-") }
 
