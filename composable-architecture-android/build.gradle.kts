@@ -24,6 +24,9 @@ dependencies {
     api(project(":composable-architecture"))
 
     // Jetpack Compose
-    implementation("androidx.compose.ui:ui:1.1.1")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.1.1")
+    implementation("androidx.compose.ui:ui:$kotlinComposeVersion")
+    implementation("androidx.compose.material:material:$kotlinComposeVersion")
+    implementation("androidx.navigation:navigation-compose:$androidxNavigationVersion")
+    implementation("androidx.navigation:navigation-runtime-ktx:$androidxNavigationVersion")
+    debugImplementation("androidx.compose.ui:ui-tooling:$kotlinComposeVersion")
 }
