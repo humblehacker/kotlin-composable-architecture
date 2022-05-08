@@ -28,13 +28,13 @@ class ComposableStore<State, Action> private constructor(
     val currentState get() = store.currentState
     val states: Flow<State> get() = store.states
     fun send(action: Action) = store.send(action)
+
     fun <LocalState, LocalAction> scope(
-        toLocalState: Lens<State, LocalState>,
-        fromLocalAction: Prism<Action, LocalAction>,
-        coroutineScope: CoroutineScope
+        state: (State) -> LocalState,
+        action: (LocalAction) -> Action
     ): ComposableStore<LocalState, LocalAction> =
         ComposableStore(
-            store.scope(toLocalState, fromLocalAction, coroutineScope),
+            store = store.scope(state, action, CoroutineScope(Dispatchers.Main)),
             navigateTo = navigateTo,
             popBackStack = popBackStack
         )
@@ -44,10 +44,30 @@ class ComposableStore<State, Action> private constructor(
         action: Prism<Action, LocalAction>
     ): ComposableStore<LocalState, LocalAction> =
         ComposableStore(
-            store = store.scope(state, action),
+            store = store.scope(state, action, CoroutineScope(Dispatchers.Main)),
             navigateTo = navigateTo,
             popBackStack = popBackStack
         )
+
+    fun <LocalState> scope(
+        state: (State) -> LocalState,
+    ): ComposableStore<LocalState, Action> {
+        return ComposableStore(
+            store = store.scope(state, { it }, CoroutineScope(Dispatchers.Main)),
+            navigateTo = navigateTo,
+            popBackStack = popBackStack
+        )
+    }
+
+    fun <LocalState> scope(
+        state: Lens<State, LocalState>
+    ): ComposableStore<LocalState, Action> {
+        return ComposableStore(
+            store = store.scope(state, CoroutineScope(Dispatchers.Main)),
+            navigateTo = navigateTo,
+            popBackStack = popBackStack
+        )
+    }
 
     companion object {
         operator fun <State, Action, Environment> invoke(
