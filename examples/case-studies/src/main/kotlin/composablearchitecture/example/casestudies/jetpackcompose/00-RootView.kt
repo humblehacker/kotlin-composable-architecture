@@ -148,19 +148,6 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
         }
     ),
     CaseStudy(
-        navTitle = "Optional State",
-        route = "01.getting-started.optional-state",
-        composable = { store ->
-            OptionalBasicsView(
-                title = "Optional state",
-                store.scope(
-                    state = RootState.optionalBasics,
-                    action = RootAction.optionalBasicsAction
-                )
-            )
-        }
-    ),
-    CaseStudy(
         navTitle = "Bindings",
         route = "01.getting-started.bindings-basics",
         composable = { store ->
@@ -177,7 +164,33 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
         navTitle = "Form Bindings",
         route = "01.getting-started.bindings.forms",
         composable = { NotYetImplementedView(title = "Bindings form") }
-    )
+    ),
+    CaseStudy(
+        navTitle = "Optional State",
+        route = "01.getting-started.optional-state",
+        composable = { store ->
+            OptionalBasicsView(
+                title = "Optional state",
+                store.scope(
+                    state = RootState.optionalBasics,
+                    action = RootAction.optionalBasicsAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
+        navTitle = "Alerts and Confirmation Dialogs",
+        route = "01.getting-started.alerts-and-confirmation-dialogs",
+        composable = { store ->
+            AlertAndConfirmationDialogView(
+                title = "Alerts & Confirmation Dialogs",
+                store.scope(
+                    state = RootState.alertAndConfirmationDialog,
+                    action = RootAction.alertAndConfirmationDialogAction
+                )
+            )
+        }
+    ),
 )
 
 val effectsCaseStudies: List<CaseStudy> = listOf(
