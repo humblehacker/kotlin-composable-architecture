@@ -10,6 +10,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import composablearchitecture.Reducer
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
@@ -47,8 +48,9 @@ class StoreViewModel<State, Action, Environment>(
         viewModelScope.launch {
             navController
                 .currentBackStackEntryFlow
-                .takeWhile { navController.backQueue.firstOrNull { it.destination.route == route } != null }
-                .collect { onDismiss() }
+                .takeWhile { navController.backQueue.map { it.destination.route }.contains(route) }
+                .onCompletion { onDismiss() }
+                .collect {}
         }
     }
 
