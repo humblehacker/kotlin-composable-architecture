@@ -6,12 +6,13 @@ import androidx.compose.runtime.*
 fun <State : Any, Action> IfLetStore(
     store: ComposableStore<State?, Action>,
     then: (@Composable (store: ComposableStore<State, Action>) -> Unit),
-    `else`: (@Composable () -> Unit) = {}
+    `else`: (@Composable () -> Unit)
 ) {
     WithViewStore(store = store) { viewStore ->
-        if (viewStore.state != null) {
+        val state = viewStore.state
+        if (state != null) {
             @Suppress("UNCHECKED_CAST")
-            then(store as ComposableStore<State, Action>)
+            then(store.scope { it ?: state })
         } else {
             `else`()
         }

@@ -16,6 +16,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Immutable
 data class RootState(
+    val alertAndConfirmationDialog: AlertAndConfirmationDialogState = AlertAndConfirmationDialogState(),
     val bindingBasics: BindingBasicsState = BindingBasicsState(),
     val counter: CounterState = CounterState(),
     val loadThenNavigate: LoadThenNavigateState = LoadThenNavigateState(),
@@ -26,6 +27,7 @@ data class RootState(
 }
 
 sealed class RootAction {
+    class AlertAndConfirmationDialog(val action: AlertAndConfirmationDialogAction) : RootAction()
     class BindingBasics(val action: BindingBasicsAction) : RootAction()
     class Counter(val action: CounterAction) : RootAction()
     class NavigateAndLoad(val action: LoadThenNavigateAction) : RootAction()
@@ -34,6 +36,7 @@ sealed class RootAction {
 
     override fun toString(): String {
         return when (this) {
+            is AlertAndConfirmationDialog -> "RootAction.AlertAndConfirmationDialog(action=$action)"
             is BindingBasics -> "RootAction.BindingBasics(action=$action)"
             is Counter -> "RootAction.Counter(action=$action)"
             is NavigateAndLoad -> "RootAction.NavigateAndLoad(action=$action)"
@@ -43,6 +46,17 @@ sealed class RootAction {
     }
 
     companion object {
+        val alertAndConfirmationDialogAction: Prism<RootAction, AlertAndConfirmationDialogAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is AlertAndConfirmationDialog -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                AlertAndConfirmationDialog(action = action)
+            }
+        )
         val bindingBasicsAction: Prism<RootAction, BindingBasicsAction> = Prism(
             getOrModify = { rootAction ->
                 when (rootAction) {
@@ -111,6 +125,11 @@ val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
             else -> state.withNoEffect()
         }
     },
+    alertAndConfirmationDialogReducer.pullback(
+        toLocalState = RootState.alertAndConfirmationDialog,
+        toLocalAction = RootAction.alertAndConfirmationDialogAction,
+        toLocalEnvironment = { AlertAndConfirmationDialogEnvironment() }
+    ),
     bindingBasicsReducer.pullback(
         toLocalState = RootState.bindingBasics,
         toLocalAction = RootAction.bindingBasicsAction,

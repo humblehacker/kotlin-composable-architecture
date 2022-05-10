@@ -2,16 +2,9 @@ package composablearchitecture
 
 import arrow.optics.Lens
 import arrow.optics.Prism
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class Store<State, Action> constructor(
     initialState: State,
@@ -42,35 +35,56 @@ class Store<State, Action> constructor(
     }
 
     fun <LocalState, LocalAction> scope(
-        toLocalState: Lens<State, LocalState>,
-        fromLocalAction: Prism<Action, LocalAction>,
+        toLocalState: (State) -> LocalState,
+        fromLocalAction: (LocalAction) -> Action,
         coroutineScope: CoroutineScope
     ): Store<LocalState, LocalAction> {
         val localStore = Store<LocalState, LocalAction>(
-            initialState = toLocalState.get(mutableState.value),
+            initialState = toLocalState(mutableState.value),
             reducer = { _, localAction ->
-                send(fromLocalAction.reverseGet(localAction))
-                toLocalState.get(mutableState.value).withNoEffect()
+                send(fromLocalAction(localAction))
+                toLocalState(mutableState.value).withNoEffect()
             },
             mainDispatcher = mainDispatcher
         )
         localStore.scopeCollectionJob = coroutineScope.launch(Dispatchers.Unconfined) {
             mutableState.collect { newValue ->
-                localStore.mutableState.value = toLocalState.get(newValue)
+                localStore.mutableState.value = toLocalState(newValue)
             }
         }
         return localStore
     }
 
-    // TODO: Should I keep this? It's only here to bring the API closer to the iOS version
     fun <LocalState, LocalAction> scope(
-        state: Lens<State, LocalState>,
-        action: Prism<Action, LocalAction>
+        toLocalState: Lens<State, LocalState>,
+        fromLocalAction: Prism<Action, LocalAction>,
+        coroutineScope: CoroutineScope
     ): Store<LocalState, LocalAction> {
         return scope(
-            toLocalState = state,
-            fromLocalAction = action,
-            coroutineScope = CoroutineScope(Dispatchers.Main)
+            toLocalState = { state -> toLocalState.get(state) },
+            fromLocalAction = { action -> fromLocalAction.reverseGet(action) },
+            coroutineScope = coroutineScope
+        )
+    }
+
+    fun <LocalState> scope(
+        toLocalState: (State) -> LocalState,
+        coroutineScope: CoroutineScope
+    ): Store<LocalState, Action> {
+        return scope(
+            toLocalState = toLocalState,
+            fromLocalAction = { it },
+            coroutineScope = coroutineScope
+        )
+    }
+
+    fun <LocalState> scope(
+        toLocalState: Lens<State, LocalState>,
+        coroutineScope: CoroutineScope
+    ): Store<LocalState, Action> {
+        return scope(
+            toLocalState = { state -> toLocalState.get(state) },
+            coroutineScope = coroutineScope
         )
     }
 
