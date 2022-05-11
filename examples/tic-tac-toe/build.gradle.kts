@@ -6,4 +6,5 @@ android {
     defaultConfig {
         applicationId = "composablearchitecture.example.tictactoe"
     }
+    namespace = "composablearchitecture.example.tictactoe"
 }

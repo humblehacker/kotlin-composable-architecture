@@ -16,6 +16,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = kotlinComposeVersion
     }
+    namespace = "composablearchitecture.example.search"
 }
 
 dependencies {
