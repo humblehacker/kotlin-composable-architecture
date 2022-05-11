@@ -13,6 +13,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.1.1"
     }
+    namespace = "composablearchitecture.android"
 }
 
 dependencies {

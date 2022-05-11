@@ -14,6 +14,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = kotlinComposeVersion
     }
+    namespace = "composablearchitecture.example.casestudies"
 }
 
 dependencies {
