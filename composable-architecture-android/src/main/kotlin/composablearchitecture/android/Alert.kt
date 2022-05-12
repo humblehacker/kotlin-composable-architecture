@@ -17,7 +17,7 @@ import java.util.*
 
 object Alert {
     @Parcelize
-    data class State<Action>(
+    data class State<Action : Parcelable>(
         val id: UUID = UUID.randomUUID(),
         val buttons: List<Button<Action>>,
         val message: TextState? = null,
@@ -46,6 +46,26 @@ object Alert {
             message = message,
             buttons = listOf(primaryButton, secondaryButton)
         )
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as State<*>
+
+            if (buttons != other.buttons) return false
+            if (message != other.message) return false
+            if (title != other.title) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = buttons.hashCode()
+            result = 31 * result + (message?.hashCode() ?: 0)
+            result = 31 * result + title.hashCode()
+            return result
+        }
     }
 
     enum class ButtonRole {
@@ -54,55 +74,112 @@ object Alert {
     }
 
     @Parcelize
-    class Button<Action>(
+    class Button<Action : Parcelable>(
         val action: ButtonAction<Action>?,
         val label: TextState,
         val role: ButtonRole?
     ) : Parcelable {
+
+        override fun toString(): String = "Button(action: $action, label: $label, role: $role)"
+
         companion object {
 
-            fun <Action> cancel(
+            fun <Action : Parcelable> cancel(
                 label: TextState,
                 action: ButtonAction<Action>? = null
             ): Button<Action> {
                 return Button(action = action, label = label, role = ButtonRole.Cancel)
             }
 
-            fun <Action> default(
+            fun <Action : Parcelable> default(
                 label: TextState,
                 action: ButtonAction<Action>? = null
             ): Button<Action> {
                 return Button(action = action, label = label, role = null)
             }
 
-            fun <Action> destructive(
+            fun <Action : Parcelable> destructive(
                 label: TextState,
                 action: ButtonAction<Action>? = null
             ): Button<Action> {
                 return Button(action = action, label = label, role = ButtonRole.Destructive)
             }
         }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Button<*>
+
+            if (action != other.action) return false
+            if (label != other.label) return false
+            if (role != other.role) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = action?.hashCode() ?: 0
+            result = 31 * result + label.hashCode()
+            result = 31 * result + (role?.hashCode() ?: 0)
+            return result
+        }
     }
 
     @Parcelize
-    class ButtonAction<Action>(val type: ActionType) : Parcelable {
+    class ButtonAction<Action : Parcelable>(val type: ActionType) : Parcelable {
+        override fun toString(): String = "ButtonAction(type: $type)"
+
         companion object {
             fun <Action : Parcelable> send(action: Action): ButtonAction<Action> {
                 return ButtonAction(ActionType.Send(action))
             }
             // TODO: animatedSend if it makes sense for Compose
         }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as ButtonAction<*>
+
+            if (type != other.type) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return type.hashCode()
+        }
     }
 
     sealed class ActionType : Parcelable {
         @Parcelize
         class Send<Action : Parcelable>(val action: Action) : ActionType()
+
         // TODO: AnimatedSend if it makes sense for Compose
+
+        override fun toString(): String {
+            return when (this) {
+                is Send<*> -> "ActionType.Send(action: $action)"
+            }
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            return this is Send<*> && other is Send<*> && this.action == other.action
+        }
+
+        override fun hashCode(): Int {
+            return javaClass.hashCode()
+        }
     }
 }
 
 @Composable
-fun <Action> Alert(
+fun <Action : Parcelable> Alert(
     store: ComposableStore<Alert.State<Action>?, Action>,
     dismiss: Action
 ) {
@@ -138,7 +215,7 @@ fun <Action> Alert(
     }
 }
 
-private fun <Action> Alert.ButtonAction<Action>?.onClick(
+private fun <Action : Parcelable> Alert.ButtonAction<Action>?.onClick(
     store: ComposableStore<Alert.State<Action>, Action>,
     dismiss: Action
 ): () -> Unit {
@@ -146,7 +223,10 @@ private fun <Action> Alert.ButtonAction<Action>?.onClick(
 
     return when (type) {
         is Alert.ActionType.Send<*> -> {
-            { store.send(type.action as Action) }
+            {
+                @Suppress("UNCHECKED_CAST")
+                store.send(type.action as Action)
+            }
         }
         else -> {
             { store.send(dismiss) }

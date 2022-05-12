@@ -45,7 +45,7 @@ class AssertionBuilder<Action, State, Environment>(private val currentState: () 
     fun doBlock(block: () -> Unit) = steps.add(Step.Do(block))
 }
 
-class TestStore<State, LocalState, Action : Comparable<Action>, LocalAction, Environment>
+class TestStore<State, LocalState, Action, LocalAction, Environment>
 private constructor(
     private var state: State,
     private val reducer: Reducer<State, Action, Environment>,
@@ -56,7 +56,7 @@ private constructor(
 ) {
 
     companion object {
-        operator fun <State, Action : Comparable<Action>, Environment> invoke(
+        operator fun <State, Action, Environment> invoke(
             state: State,
             reducer: Reducer<State, Action, Environment>,
             environment: Environment,
