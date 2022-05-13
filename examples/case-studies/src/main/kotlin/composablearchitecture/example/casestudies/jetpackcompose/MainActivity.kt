@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
             StoreViewModel.Factory(
                 initialState = RootState(),
                 reducer = rootReducer,
-                environment = RootEnvironment(),
+                environment = RootEnvironment.live(),
                 navController = navController,
                 mainDispatcher = Dispatchers.Main,
                 owner = this

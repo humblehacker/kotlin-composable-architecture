@@ -19,6 +19,7 @@ data class RootState(
     val alertAndConfirmationDialog: AlertAndConfirmationDialogState = AlertAndConfirmationDialogState(),
     val bindingBasics: BindingBasicsState = BindingBasicsState(),
     val counter: CounterState = CounterState(),
+    val effectsBasics: EffectsBasicsState = EffectsBasicsState(),
     val loadThenNavigate: LoadThenNavigateState = LoadThenNavigateState(),
     val optionalBasics: OptionalBasicsState = OptionalBasicsState(),
     val twoCounters: TwoCountersState = TwoCountersState(),
@@ -30,6 +31,7 @@ sealed class RootAction {
     class AlertAndConfirmationDialog(val action: AlertAndConfirmationDialogAction) : RootAction()
     class BindingBasics(val action: BindingBasicsAction) : RootAction()
     class Counter(val action: CounterAction) : RootAction()
+    class EffectsBasics(val action: EffectsBasicsAction) : RootAction()
     class NavigateAndLoad(val action: LoadThenNavigateAction) : RootAction()
     class OptionalBasics(val action: OptionalBasicsAction) : RootAction()
     class TwoCounters(val action: TwoCountersAction) : RootAction()
@@ -39,6 +41,7 @@ sealed class RootAction {
             is AlertAndConfirmationDialog -> "RootAction.AlertAndConfirmationDialog(action=$action)"
             is BindingBasics -> "RootAction.BindingBasics(action=$action)"
             is Counter -> "RootAction.Counter(action=$action)"
+            is EffectsBasics -> "RootAction.EffectsBasics(action=$action)"
             is NavigateAndLoad -> "RootAction.NavigateAndLoad(action=$action)"
             is OptionalBasics -> "RootAction.OptionalBasics(action=$action)"
             is TwoCounters -> "RootAction.TwoCounters(action=$action)"
@@ -46,17 +49,18 @@ sealed class RootAction {
     }
 
     companion object {
-        val alertAndConfirmationDialogAction: Prism<RootAction, AlertAndConfirmationDialogAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is AlertAndConfirmationDialog -> rootAction.action.right()
-                    else -> rootAction.left()
+        val alertAndConfirmationDialogAction: Prism<RootAction, AlertAndConfirmationDialogAction> =
+            Prism(
+                getOrModify = { rootAction ->
+                    when (rootAction) {
+                        is AlertAndConfirmationDialog -> rootAction.action.right()
+                        else -> rootAction.left()
+                    }
+                },
+                reverseGet = { action ->
+                    AlertAndConfirmationDialog(action = action)
                 }
-            },
-            reverseGet = { action ->
-                AlertAndConfirmationDialog(action = action)
-            }
-        )
+            )
         val bindingBasicsAction: Prism<RootAction, BindingBasicsAction> = Prism(
             getOrModify = { rootAction ->
                 when (rootAction) {
@@ -77,6 +81,17 @@ sealed class RootAction {
             },
             reverseGet = { action ->
                 Counter(action = action)
+            }
+        )
+        val effectsBasicsAction: Prism<RootAction, EffectsBasicsAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is EffectsBasics -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                EffectsBasics(action = action)
             }
         )
         val loadThenNavigateAction: Prism<RootAction, LoadThenNavigateAction> = Prism(
@@ -115,9 +130,15 @@ sealed class RootAction {
     }
 }
 
-data class RootEnvironment(val placeholder: Int = 0)
+data class RootEnvironment(
+    val fact: FactClient
+) {
+    companion object
+}
 
-fun RootEnvironment.live() = RootEnvironment()
+fun RootEnvironment.Companion.live() = RootEnvironment(
+    fact = FactClient.live()
+)
 
 val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
     Reducer { state, action, _ ->
@@ -139,6 +160,11 @@ val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
         toLocalState = RootState.counter,
         toLocalAction = RootAction.counterAction,
         toLocalEnvironment = { CounterEnvironment() }
+    ),
+    effectsBasicsReducer.pullback(
+        toLocalState = RootState.effectsBasics,
+        toLocalAction = RootAction.effectsBasicsAction,
+        toLocalEnvironment = { EffectsBasicsEnvironment(it.fact) }
     ),
     loadThenNavigateReducer.pullback(
         toLocalState = RootState.loadThenNavigate,

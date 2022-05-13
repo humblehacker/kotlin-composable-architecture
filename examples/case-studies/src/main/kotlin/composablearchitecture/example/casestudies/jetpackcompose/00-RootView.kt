@@ -197,7 +197,15 @@ val effectsCaseStudies: List<CaseStudy> = listOf(
     CaseStudy(
         navTitle = "Basics",
         route = "01.effects.basic",
-        composable = { NotYetImplementedView(title = "Basics") }
+        composable = { store ->
+            EffectsBasicsView(
+                title = "Basics",
+                store = store.scope(
+                    state = RootState.effectsBasics,
+                    action = RootAction.effectsBasicsAction
+                )
+            )
+        }
     )
 )
 
