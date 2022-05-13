@@ -8,7 +8,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import composablearchitecture.android.StoreViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 
 class MainActivity : ComponentActivity() {
 
@@ -20,7 +19,7 @@ class MainActivity : ComponentActivity() {
             StoreViewModel.Factory(
                 initialState = RootState(),
                 reducer = rootReducer,
-                environment = RootEnvironment.live(),
+                environment = RootEnvironment.live(applicationContext),
                 navController = navController,
                 mainDispatcher = Dispatchers.Main,
                 owner = this
