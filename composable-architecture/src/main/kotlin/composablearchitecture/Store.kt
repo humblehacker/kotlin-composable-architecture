@@ -101,10 +101,9 @@ class Store<State, Action> constructor(
 
         GlobalScope.launch(mainDispatcher) {
             try {
-                val actions = effect.sink()
-                if (actions.isNotEmpty()) {
+                effect.sink {
                     withContext(mainDispatcher) {
-                        actions.forEach { send(it) }
+                        send(it)
                     }
                 }
             } catch (ex: CancellationException) {

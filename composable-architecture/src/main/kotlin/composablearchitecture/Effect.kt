@@ -1,8 +1,11 @@
+@file:OptIn(ExperimentalTime::class)
+
 package composablearchitecture
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
 class Effect<Output>(internal var flow: Flow<Output>) {
 
@@ -29,12 +32,12 @@ class Effect<Output>(internal var flow: Flow<Output>) {
             .cancellable(id, cancelInFlight = true)
     }
 
-    suspend fun sink(): List<Output> {
-        val outputs = mutableListOf<Output>()
-        flow.toList(outputs)
-        return outputs
+    suspend fun sink(collector: FlowCollector<Output>) {
+        flow.collect(collector)
     }
 }
+
+fun <T> Flow<T>.asEffect(): Effect<T> = Effect(this)
 
 fun <State, Output> State.withNoEffect(): Result<State, Output> =
     Result(this, Effect.none())
@@ -43,3 +46,9 @@ fun <State, Output> State.withEffect(
     block: suspend FlowCollector<Output>.() -> Unit
 ): Result<State, Output> =
     Result(this, Effect(flow(block)))
+
+fun <State, Output> State.withEffect(flow: Flow<Output>): Result<State, Output> =
+    Result(this, Effect(flow))
+
+fun <State, Output> State.withEffect(effect: Effect<Output>) =
+    Result(this, effect)

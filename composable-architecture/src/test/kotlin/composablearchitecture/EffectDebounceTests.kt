@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package composablearchitecture
 
 import kotlinx.coroutines.flow.asFlow
@@ -10,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -24,11 +27,10 @@ class EffectDebounceTests {
 
         suspend fun runDebouncedEffect(value: Int) {
             launch {
-                values.addAll(
-                    Effect(flow = flowOf(value))
-                        .debounce("cancelToken", 1.seconds)
-                        .sink()
-                )
+                flowOf(value)
+                    .asEffect()
+                    .debounce("cancelToken", 1.seconds)
+                    .sink { values.add(it) }
             }
         }
 
@@ -73,16 +75,14 @@ class EffectDebounceTests {
 
         fun runDebouncedEffect(value: Int) {
             launch {
-                values.addAll(
-                    Effect(
-                        flow = {
-                            effectRuns += 1
-                            value
-                        }.asFlow()
-                    )
-                        .debounce("cancelToken", 1.seconds)
-                        .sink()
-                )
+                {
+                    effectRuns += 1
+                    value
+                }
+                    .asFlow()
+                    .asEffect()
+                    .debounce("cancelToken", 1.seconds)
+                    .sink { values.add(it) }
             }
         }
 

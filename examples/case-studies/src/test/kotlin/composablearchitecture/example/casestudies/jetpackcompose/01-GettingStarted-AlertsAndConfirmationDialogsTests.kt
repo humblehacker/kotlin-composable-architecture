@@ -5,13 +5,14 @@ import composablearchitecture.android.Alert
 import composablearchitecture.android.TextState
 import composablearchitecture.test.TestStore
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 
 class AlertsAndConfirmationDialogsTests {
 
     @Test
-    fun alert() {
+    fun alert() = runTest {
         val dispatcher = TestCoroutineDispatcher()
         val environment = AlertAndConfirmationDialogEnvironment()
         val store = TestStore(
@@ -52,7 +53,7 @@ class AlertsAndConfirmationDialogsTests {
     }
 
     @Test @Ignore
-    fun confirmationDialog() {
+    fun confirmationDialog() = runTest  {
         // TODO
     }
 }
