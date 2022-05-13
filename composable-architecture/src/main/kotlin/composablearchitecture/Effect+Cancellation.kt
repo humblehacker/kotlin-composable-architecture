@@ -1,32 +1,38 @@
+@file:OptIn(ExperimentalTime::class)
+
 package composablearchitecture
 
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
 private val mutex = Mutex()
 private val cancellationJobs: MutableMap<Any, MutableSet<Job>> = mutableMapOf()
 
 fun <Output> Effect<Output>.cancellable(id: Any, cancelInFlight: Boolean = false): Effect<Output> =
-    Effect(flow {
+    Effect(channelFlow {
         if (cancelInFlight) {
             mutex.withLock {
                 cancellationJobs[id]?.forEach { it.cancel() }
                 cancellationJobs.remove(id)
             }
         }
-        val outputs = coroutineScope {
-            val deferred = async(start = CoroutineStart.LAZY) { this@cancellable.flow.toList() }
+
+        coroutineScope {
+            val deferred = async(start = CoroutineStart.LAZY) {
+                flow.cancellable().collect { send(it) }
+            }
+
             mutex.withLock {
                 @Suppress("RemoveExplicitTypeArguments")
                 cancellationJobs.getOrPut(id) { mutableSetOf<Job>() }.add(deferred)
             }
+
             try {
                 deferred.start()
                 deferred.await()
@@ -40,7 +46,6 @@ fun <Output> Effect<Output>.cancellable(id: Any, cancelInFlight: Boolean = false
                 }
             }
         }
-        outputs.forEach { emit(it) }
     })
 
 fun <Output> Effect.Companion.cancel(id: Any): Effect<Output> = Effect(flow {

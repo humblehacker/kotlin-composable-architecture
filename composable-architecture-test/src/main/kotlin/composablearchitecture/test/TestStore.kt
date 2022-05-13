@@ -3,9 +3,7 @@ package composablearchitecture.test
 import arrow.optics.Lens
 import arrow.optics.Prism
 import composablearchitecture.Reducer
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 
 internal sealed class Step<Action, State, Environment> {
@@ -54,6 +52,7 @@ private constructor(
     private val fromLocalAction: Prism<Action, LocalAction>,
     private val testDispatcher: TestCoroutineDispatcher = TestCoroutineDispatcher()
 ) {
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     companion object {
         operator fun <State, Action, Environment> invoke(
@@ -85,7 +84,7 @@ private constructor(
             testDispatcher
         )
 
-    fun assert(block: AssertionBuilder<LocalAction, LocalState, Environment>.() -> Unit) {
+    suspend fun assert(block: suspend AssertionBuilder<LocalAction, LocalState, Environment>.() -> Unit) {
         val assertion = AssertionBuilder<LocalAction, LocalState, Environment> {
             toLocalState.get(state)
         }
@@ -97,10 +96,11 @@ private constructor(
             val (newState, effect) = reducer.run(state, action, environment)
             state = newState
 
-            GlobalScope.launch(testDispatcher) {
+            coroutineScope.launch(testDispatcher) {
                 try {
-                    val actions = effect.sink()
-                    receivedActions.addAll(actions)
+                    effect.sink {
+                        receivedActions.add(it)
+                    }
                 } catch (ex: CancellationException) {
                     // ignore
                 }
