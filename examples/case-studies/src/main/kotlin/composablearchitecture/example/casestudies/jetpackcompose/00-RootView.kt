@@ -206,6 +206,26 @@ val effectsCaseStudies: List<CaseStudy> = listOf(
                 )
             )
         }
+    ),
+    CaseStudy(
+        navTitle = "Cancellation",
+        route = "01.effects.cancellation",
+        composable = { store ->
+            EffectsCancellationView(
+                title = "Effect cancellation",
+                store = store.scope(
+                    state = RootState.effectsCancellation,
+                    action = RootAction.effectsCancellationAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
+        navTitle = "Long-living effects",
+        route = "01.effects.long_living",
+        composable = { _ ->
+            NotYetImplementedView("Long-living effects")
+        }
     )
 )
 

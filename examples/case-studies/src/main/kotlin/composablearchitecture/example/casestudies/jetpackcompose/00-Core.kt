@@ -20,6 +20,7 @@ data class RootState(
     val bindingBasics: BindingBasicsState = BindingBasicsState(),
     val counter: CounterState = CounterState(),
     val effectsBasics: EffectsBasicsState = EffectsBasicsState(),
+    val effectsCancellation: EffectsCancellationState = EffectsCancellationState(),
     val loadThenNavigate: LoadThenNavigateState = LoadThenNavigateState(),
     val optionalBasics: OptionalBasicsState = OptionalBasicsState(),
     val twoCounters: TwoCountersState = TwoCountersState(),
@@ -32,6 +33,7 @@ sealed class RootAction {
     class BindingBasics(val action: BindingBasicsAction) : RootAction()
     class Counter(val action: CounterAction) : RootAction()
     class EffectsBasics(val action: EffectsBasicsAction) : RootAction()
+    class EffectsCancellation(val action: EffectsCancellationAction) : RootAction()
     class NavigateAndLoad(val action: LoadThenNavigateAction) : RootAction()
     class OptionalBasics(val action: OptionalBasicsAction) : RootAction()
     class TwoCounters(val action: TwoCountersAction) : RootAction()
@@ -42,6 +44,7 @@ sealed class RootAction {
             is BindingBasics -> "RootAction.BindingBasics(action=$action)"
             is Counter -> "RootAction.Counter(action=$action)"
             is EffectsBasics -> "RootAction.EffectsBasics(action=$action)"
+            is EffectsCancellation -> "RootAction.EffectsCancellation(action=$action)"
             is NavigateAndLoad -> "RootAction.NavigateAndLoad(action=$action)"
             is OptionalBasics -> "RootAction.OptionalBasics(action=$action)"
             is TwoCounters -> "RootAction.TwoCounters(action=$action)"
@@ -92,6 +95,17 @@ sealed class RootAction {
             },
             reverseGet = { action ->
                 EffectsBasics(action = action)
+            }
+        )
+        val effectsCancellationAction: Prism<RootAction, EffectsCancellationAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is EffectsCancellation -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                EffectsCancellation(action = action)
             }
         )
         val loadThenNavigateAction: Prism<RootAction, LoadThenNavigateAction> = Prism(
@@ -165,6 +179,11 @@ val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
         toLocalState = RootState.effectsBasics,
         toLocalAction = RootAction.effectsBasicsAction,
         toLocalEnvironment = { EffectsBasicsEnvironment(it.fact) }
+    ),
+    effectsCancellationReducer.pullback(
+        toLocalState = RootState.effectsCancellation,
+        toLocalAction = RootAction.effectsCancellationAction,
+        toLocalEnvironment = { EffectsCancellationEnvironment(it.fact) }
     ),
     loadThenNavigateReducer.pullback(
         toLocalState = RootState.loadThenNavigate,

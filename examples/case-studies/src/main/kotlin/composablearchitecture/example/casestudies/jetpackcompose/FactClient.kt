@@ -19,12 +19,11 @@ fun FactClient.Companion.live(): FactClient {
         fetch = { number ->
             Effect(
                 flow {
+                    delay(1.seconds)
                     try {
                         val json = URL("http://numbersapi.com/$number/trivia").readText()
                         emit(json)
                     } catch (e: Exception) {
-                        println(e)
-                        delay(1.seconds)
                         emit("$number is a good number Brent")
                     }
                 }.flowOn(Dispatchers.Default)
