@@ -3,8 +3,12 @@ package composablearchitecture.test
 import arrow.optics.Lens
 import arrow.optics.Prism
 import composablearchitecture.Reducer
-import kotlinx.coroutines.*
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 
 internal sealed class Step<Action, State, Environment> {
     class Send<Action, State, Environment>(
@@ -24,6 +28,13 @@ internal sealed class Step<Action, State, Environment> {
     class Do<Action, State, Environment>(
         val block: () -> Unit
     ) : Step<Action, State, Environment>()
+
+    class AdvanceTimeBy<Action, State, Environment>(
+        val delayTimeMillis: Long
+    ) : Step<Action, State, Environment>()
+
+    class AdvanceUntilIdle<Action, State, Environment> :
+        Step<Action, State, Environment>()
 }
 
 class AssertionBuilder<Action, State, Environment>(private val currentState: () -> State) {
@@ -41,6 +52,10 @@ class AssertionBuilder<Action, State, Environment>(private val currentState: () 
     fun environment(block: (Environment) -> Unit) = steps.add(Step.Environment(block))
 
     fun doBlock(block: () -> Unit) = steps.add(Step.Do(block))
+
+    fun advanceTimeBy(delayTimeMillis: Long) = steps.add(Step.AdvanceTimeBy(delayTimeMillis))
+
+    fun advanceUntilIdle() = steps.add(Step.AdvanceUntilIdle())
 }
 
 class TestStore<State, LocalState, Action, LocalAction, Environment>
@@ -50,7 +65,7 @@ private constructor(
     private val environment: Environment,
     private val toLocalState: Lens<State, LocalState>,
     private val fromLocalAction: Prism<Action, LocalAction>,
-    private val testDispatcher: TestCoroutineDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
@@ -59,7 +74,7 @@ private constructor(
             state: State,
             reducer: Reducer<State, Action, Environment>,
             environment: Environment,
-            testDispatcher: TestCoroutineDispatcher = TestCoroutineDispatcher()
+            testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
         ) =
             TestStore(
                 state,
@@ -128,6 +143,8 @@ private constructor(
                     step.block(environment)
                 }
                 is Step.Do -> step.block()
+                is Step.AdvanceTimeBy -> testDispatcher.scheduler.advanceTimeBy(step.delayTimeMillis)
+                is Step.AdvanceUntilIdle -> testDispatcher.scheduler.advanceUntilIdle()
             }
 
             val actualState = toLocalState.get(state)
