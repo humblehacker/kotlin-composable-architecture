@@ -31,3 +31,11 @@ fun FactClient.Companion.live(): FactClient {
         }
     )
 }
+
+fun FactClient.Companion.failing(): FactClient {
+    return FactClient(
+        fetch = { _ ->
+            fatalError("FactClient.fetch should not have been called")
+        }
+    )
+}
