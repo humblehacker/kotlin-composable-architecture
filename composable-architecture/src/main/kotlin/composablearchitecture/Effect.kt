@@ -35,6 +35,11 @@ class Effect<Output>(internal var flow: Flow<Output>) {
     suspend fun sink(collector: FlowCollector<Output>) {
         flow.collect(collector)
     }
+
+    // `catch` is rudimentary analog to `catchToEffect` in `TCA`.
+    fun <T> catch(action: suspend FlowCollector<Output>.(Throwable) -> Unit): Effect<T> {
+        return Effect(flow.catch(action).map { it as T })
+    }
 }
 
 fun <T> Flow<T>.asEffect(): Effect<T> = Effect(this)
