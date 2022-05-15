@@ -4,6 +4,7 @@ import arrow.core.left
 import arrow.core.right
 import composablearchitecture.test.TestStore
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Test
 import retrofit2.HttpException
@@ -12,7 +13,7 @@ import retrofit2.Response
 class SearchTests {
 
     @Test
-    fun `Search and clear query`() {
+    fun `Search and clear query`() = runTest {
         val dispatcher = TestCoroutineDispatcher()
         val environment = SearchEnvironment(weatherClient = MockWeatherClient())
         val store = TestStore(
@@ -40,7 +41,7 @@ class SearchTests {
     }
 
     @Test
-    fun `Search failure`() {
+    fun `Search failure`() = runTest {
         val dispatcher = TestCoroutineDispatcher()
         val environment = SearchEnvironment(weatherClient = MockWeatherClient())
         val store = TestStore(
@@ -65,7 +66,7 @@ class SearchTests {
     }
 
     @Test
-    fun `Clear query cancels in-flight search request`() {
+    fun `Clear query cancels in-flight search request`() = runTest {
         val dispatcher = TestCoroutineDispatcher()
         val environment = SearchEnvironment(weatherClient = MockWeatherClient())
         val store = TestStore(
@@ -87,7 +88,7 @@ class SearchTests {
     }
 
     @Test
-    fun `Tap on location`() {
+    fun `Tap on location`() = runTest {
         val specialLocation = Location(42, "Special Place")
         val specialLocationWeather = LocationWeather(
             consolidatedWeather = mockWeather,
@@ -119,7 +120,7 @@ class SearchTests {
     }
 
     @Test
-    fun `Tap on location failure`() {
+    fun `Tap on location failure`() = runTest {
         val dispatcher = TestCoroutineDispatcher()
 
         val error = HttpException(Response.error<Unit>(500, "".toResponseBody())).left()

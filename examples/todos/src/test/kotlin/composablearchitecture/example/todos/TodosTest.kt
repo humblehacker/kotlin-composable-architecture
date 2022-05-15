@@ -1,14 +1,16 @@
 package composablearchitecture.example.todos
 
+import composablearchitecture.android.Alert.ButtonAction.Companion.send
 import composablearchitecture.test.TestStore
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.util.UUID
 
 class TodosTest {
 
     @Test
-    fun `Store scoped test`() {
+    fun `Store scoped test`() = runTest {
         val testDispatcher = TestCoroutineDispatcher()
 
         val todo = Todo(id = UUID.fromString("DEADBEEF-DEAD-BEEF-DEAD-BEEDDEADBEEF"))
@@ -31,7 +33,7 @@ class TodosTest {
     }
 
     @Test
-    fun `When add todo is tapped new item is showing up`() {
+    fun `When add todo is tapped new item is showing up`() = runTest {
         val testDispatcher = TestCoroutineDispatcher()
 
         val store = TestStore(

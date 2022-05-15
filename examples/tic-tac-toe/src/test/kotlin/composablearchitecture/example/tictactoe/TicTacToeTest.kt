@@ -2,12 +2,13 @@ package composablearchitecture.example.tictactoe
 
 import composablearchitecture.test.TestStore
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class TicTacToeTest {
 
     @Test
-    fun `Player X wins a game`() {
+    fun `Player X wins a game`() = runTest {
         val testDispatcher = TestCoroutineDispatcher()
 
         val store = TestStore(
@@ -37,7 +38,7 @@ class TicTacToeTest {
     }
 
     @Test
-    fun `Player X and Player O play a tie game`() {
+    fun `Player X and Player O play a tie game`() = runTest {
         val testDispatcher = TestCoroutineDispatcher()
 
         val store = TestStore(
