@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import composablearchitecture.android.ComposableStore
+import composablearchitecture.example.casestudies.jetpackcompose.extras.NotYetImplementedView
 
 val backgroundColor = Color(0xF0F0F0FF)
 
@@ -34,6 +35,8 @@ fun RootView(navController: NavHostController, store: ComposableStore<RootState,
                 action = RootAction.loadThenNavigateAction
             )
         )
+
+        longLivingEffectsGraph()
     }
 }
 
@@ -100,22 +103,6 @@ fun CaseStudyItem(caseStudy: CaseStudy, navigateTo: (route: String) -> Unit) {
             style = MaterialTheme.typography.subtitle2,
             textAlign = TextAlign.Left,
             modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun NotYetImplementedView(title: String) {
-    Scaffold(topBar = {
-        TopAppBar(title = { Text(text = title) })
-    }, backgroundColor = backgroundColor) {
-        Text(
-            "Not yet implemented",
-            style = MaterialTheme.typography.h6,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentHeight()
         )
     }
 }
@@ -197,7 +184,41 @@ val effectsCaseStudies: List<CaseStudy> = listOf(
     CaseStudy(
         navTitle = "Basics",
         route = "01.effects.basic",
-        composable = { NotYetImplementedView(title = "Basics") }
+        composable = { store ->
+            EffectsBasicsView(
+                title = "Basics",
+                store = store.scope(
+                    state = RootState.effectsBasics,
+                    action = RootAction.effectsBasicsAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
+        navTitle = "Cancellation",
+        route = "01.effects.cancellation",
+        composable = { store ->
+            EffectsCancellationView(
+                title = "Effect cancellation",
+                store = store.scope(
+                    state = RootState.effectsCancellation,
+                    action = RootAction.effectsCancellationAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
+        navTitle = "Long-living effects",
+        route = "01.effects.long_living",
+        composable = { store ->
+            LongLivingEffectsView(
+                title = "Long-living effects",
+                store = store.scope(
+                    state = RootState.longLivingEffects,
+                    action = RootAction.longLivingEffectsAction
+                )
+            )
+        }
     )
 )
 

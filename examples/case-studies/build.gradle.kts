@@ -23,4 +23,5 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0")
     implementation("com.github.jeziellago:compose-markdown:0.2.9")
     implementation("androidx.compose.material:material-icons-extended:$kotlinComposeVersion")
+    implementation("com.google.accompanist:accompanist-permissions:0.23.1")
 }

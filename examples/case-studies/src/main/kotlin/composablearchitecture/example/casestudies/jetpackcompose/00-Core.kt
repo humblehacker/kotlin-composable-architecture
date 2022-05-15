@@ -1,15 +1,20 @@
 // ktlint-disable filename
 package composablearchitecture.example.casestudies.jetpackcompose
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import arrow.core.left
 import arrow.core.right
 import arrow.optics.Prism
 import arrow.optics.optics
+import composablearchitecture.Effect
 import composablearchitecture.Reducer
 import composablearchitecture.debug
+import composablearchitecture.example.casestudies.jetpackcompose.extras.ScreenshotDetector
 import composablearchitecture.withNoEffect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.parcelize.Parcelize
 
 @optics
@@ -19,7 +24,10 @@ data class RootState(
     val alertAndConfirmationDialog: AlertAndConfirmationDialogState = AlertAndConfirmationDialogState(),
     val bindingBasics: BindingBasicsState = BindingBasicsState(),
     val counter: CounterState = CounterState(),
+    val effectsBasics: EffectsBasicsState = EffectsBasicsState(),
+    val effectsCancellation: EffectsCancellationState = EffectsCancellationState(),
     val loadThenNavigate: LoadThenNavigateState = LoadThenNavigateState(),
+    val longLivingEffects: LongLivingEffectsState = LongLivingEffectsState(),
     val optionalBasics: OptionalBasicsState = OptionalBasicsState(),
     val twoCounters: TwoCountersState = TwoCountersState(),
 ) : Parcelable {
@@ -30,6 +38,9 @@ sealed class RootAction {
     class AlertAndConfirmationDialog(val action: AlertAndConfirmationDialogAction) : RootAction()
     class BindingBasics(val action: BindingBasicsAction) : RootAction()
     class Counter(val action: CounterAction) : RootAction()
+    class EffectsBasics(val action: EffectsBasicsAction) : RootAction()
+    class EffectsCancellation(val action: EffectsCancellationAction) : RootAction()
+    class LongLivingEffects(val action: LongLivingEffectsAction) : RootAction()
     class NavigateAndLoad(val action: LoadThenNavigateAction) : RootAction()
     class OptionalBasics(val action: OptionalBasicsAction) : RootAction()
     class TwoCounters(val action: TwoCountersAction) : RootAction()
@@ -39,6 +50,9 @@ sealed class RootAction {
             is AlertAndConfirmationDialog -> "RootAction.AlertAndConfirmationDialog(action=$action)"
             is BindingBasics -> "RootAction.BindingBasics(action=$action)"
             is Counter -> "RootAction.Counter(action=$action)"
+            is EffectsBasics -> "RootAction.EffectsBasics(action=$action)"
+            is EffectsCancellation -> "RootAction.EffectsCancellation(action=$action)"
+            is LongLivingEffects -> "RootAction.LongLivingEffects(action=$action)"
             is NavigateAndLoad -> "RootAction.NavigateAndLoad(action=$action)"
             is OptionalBasics -> "RootAction.OptionalBasics(action=$action)"
             is TwoCounters -> "RootAction.TwoCounters(action=$action)"
@@ -46,17 +60,18 @@ sealed class RootAction {
     }
 
     companion object {
-        val alertAndConfirmationDialogAction: Prism<RootAction, AlertAndConfirmationDialogAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is AlertAndConfirmationDialog -> rootAction.action.right()
-                    else -> rootAction.left()
+        val alertAndConfirmationDialogAction: Prism<RootAction, AlertAndConfirmationDialogAction> =
+            Prism(
+                getOrModify = { rootAction ->
+                    when (rootAction) {
+                        is AlertAndConfirmationDialog -> rootAction.action.right()
+                        else -> rootAction.left()
+                    }
+                },
+                reverseGet = { action ->
+                    AlertAndConfirmationDialog(action = action)
                 }
-            },
-            reverseGet = { action ->
-                AlertAndConfirmationDialog(action = action)
-            }
-        )
+            )
         val bindingBasicsAction: Prism<RootAction, BindingBasicsAction> = Prism(
             getOrModify = { rootAction ->
                 when (rootAction) {
@@ -77,6 +92,39 @@ sealed class RootAction {
             },
             reverseGet = { action ->
                 Counter(action = action)
+            }
+        )
+        val effectsBasicsAction: Prism<RootAction, EffectsBasicsAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is EffectsBasics -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                EffectsBasics(action = action)
+            }
+        )
+        val effectsCancellationAction: Prism<RootAction, EffectsCancellationAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is EffectsCancellation -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                EffectsCancellation(action = action)
+            }
+        )
+        val longLivingEffectsAction: Prism<RootAction, LongLivingEffectsAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is LongLivingEffects -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                LongLivingEffects(action = action)
             }
         )
         val loadThenNavigateAction: Prism<RootAction, LoadThenNavigateAction> = Prism(
@@ -115,9 +163,22 @@ sealed class RootAction {
     }
 }
 
-data class RootEnvironment(val placeholder: Int = 0)
+data class RootEnvironment(
+    val fact: FactClient,
+    val screenshotDetector: ScreenshotDetector,
+    val userDidTakeScreenshot: Effect<Unit>
+) {
+    companion object
+}
 
-fun RootEnvironment.live() = RootEnvironment()
+fun RootEnvironment.Companion.live(applicationContext: Context): RootEnvironment {
+    val screenshotDetector = ScreenshotDetector(applicationContext)
+    return RootEnvironment(
+        fact = FactClient.live(),
+        screenshotDetector = screenshotDetector,
+        userDidTakeScreenshot = liveUserDidTakeScreenshot(screenshotDetector)
+    )
+}
 
 val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
     Reducer { state, action, _ ->
@@ -140,6 +201,21 @@ val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
         toLocalAction = RootAction.counterAction,
         toLocalEnvironment = { CounterEnvironment() }
     ),
+    effectsBasicsReducer.pullback(
+        toLocalState = RootState.effectsBasics,
+        toLocalAction = RootAction.effectsBasicsAction,
+        toLocalEnvironment = { EffectsBasicsEnvironment(it.fact) }
+    ),
+    effectsCancellationReducer.pullback(
+        toLocalState = RootState.effectsCancellation,
+        toLocalAction = RootAction.effectsCancellationAction,
+        toLocalEnvironment = { EffectsCancellationEnvironment(it.fact) }
+    ),
+    longLivingEffectsReducer.pullback(
+        toLocalState = RootState.longLivingEffects,
+        toLocalAction = RootAction.longLivingEffectsAction,
+        toLocalEnvironment = { LongLivingEffectsEnvironment(it.userDidTakeScreenshot) }
+    ),
     loadThenNavigateReducer.pullback(
         toLocalState = RootState.loadThenNavigate,
         toLocalAction = RootAction.loadThenNavigateAction,
@@ -156,3 +232,13 @@ val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
         toLocalEnvironment = { TwoCountersEnvironment() }
     ),
 ).debug()
+
+private fun liveUserDidTakeScreenshot(
+    screenshotDetector: ScreenshotDetector
+): Effect<Unit> {
+    return Effect(
+        screenshotDetector.screenshotTaken
+            .onEach { println(it) }
+            .map { _ -> Unit }
+    )
+}
