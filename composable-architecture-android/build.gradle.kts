@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-parcelize")
+    `maven-publish`
 }
 
 android {
@@ -14,6 +15,32 @@ android {
         kotlinCompilerExtensionVersion = "1.1.1"
     }
     namespace = "composablearchitecture.android"
+    defaultConfig {
+        aarMetadata {
+            minCompileSdk = androidCompileSdkVersion
+            minSdk = androidMinSdkVersion
+        }
+    }
+    publishing {
+        multipleVariants {
+            withSourcesJar()
+            withJavadocJar()
+            allVariants()
+        }
+    }
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.humblehacker"
+            artifactId = "composable-architecture-android"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
 
 dependencies {
