@@ -99,6 +99,7 @@ val effectsCancellationReducer =
                     .withEffect<EffectsCancellationState, EffectsCancellationAction>(
                         environment.fact.fetch(state.count)
                             .map { EffectsCancellationAction.TriviaResponse(Result.success(it)) }
+                            .catch { emit(EffectsCancellationAction.TriviaResponse(Result.failure(it))) }
                     )
                     .cancellable(triviaRequestId)
             }
