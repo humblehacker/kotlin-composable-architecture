@@ -1,6 +1,20 @@
 plugins {
     id("kotlin")
     id("kotlin-kapt")
+    `maven-publish`
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.humblehacker"
+            artifactId = "composable-architecture"
+
+            afterEvaluate {
+                from(components["kotlin"])
+            }
+        }
+    }
 }
 
 dependencies {
