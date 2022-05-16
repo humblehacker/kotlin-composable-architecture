@@ -7,7 +7,7 @@ referential equality.  `EquatableException` can be used as a base class for Exce
 that are equatable by type and `message`.
  */
 
-class EquatableException(message: String = "") : Exception(message) {
+open class EquatableException(message: String = "") : Exception(message) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
