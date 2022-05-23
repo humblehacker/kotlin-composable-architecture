@@ -5,28 +5,26 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-/*
-  Caveat: If you put a NavigationLink with empty content in a Row/Column, it can still
-  affect the layout depending on the arrangement. For example, with SpaceBetween, even though
-  there is no content, space will still be inserted between the empty NavigationLinks.
-
-  Workaround is to place your view's content and the NavigationLinks inside a Box.
- */
 @Composable
 fun <State, Action> ViewStore<State, Action>.NavigationLink(
     destination: String,
     isActive: Boolean,
     sendIsActive: (Boolean) -> Action,
-    content: @Composable () -> Unit = {}
+    content: @Composable (() -> Unit)? = null
 ) {
-    Column(modifier = Modifier.clickable { send(sendIsActive(true)) }) {
-        content()
+    content?.let {
+        Column(modifier = Modifier.clickable { send(sendIsActive(true)) }) {
+            it()
+        }
     }
 
-    if (isActive) {
-        navigateTo(
-            route = destination,
-            onDismiss = { send(sendIsActive(false)) }
-        )
+    If(isActive) {
+        navigateTo(destination, onDismiss = { this.send(sendIsActive(false)) })
+    }
+}
+
+@Composable fun If(condition: Boolean, then: () -> Unit) {
+    if (condition) {
+        then()
     }
 }
