@@ -7,6 +7,7 @@ fun <State, Action, Environment> Reducer<State, Action, Environment>.debug(): Re
         val stateString = result.state.toString()
             .replace("\n", "\\n")
             .replace("\t", "\\t")
-        println("state=${stateString}, action=$action")
+        println("state=${stateString}")
+        println("action=$action")
         result
     }
