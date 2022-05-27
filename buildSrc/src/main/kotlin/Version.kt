@@ -19,6 +19,7 @@ val Project.coroutinesVersion: String get() = props.getProperty("coroutinesVersi
 val Project.junitVersion: String get() = props.getProperty("junitVersion")
 val Project.kotlinComposeVersion: String get() = props.getProperty("kotlinComposeVersion")
 val Project.kotlinVersion: String get() = props.getProperty("kotlinVersion")
+val Project.kotlinKspVersion: String get() = props.getProperty("kotlinKspVersion")
 val Project.moshiVersion: String get() = props.getProperty("moshiVersion")
 val Project.okhttpVersion: String get() = props.getProperty("okhttpVersion")
 val Project.retrofitVersion: String get() = props.getProperty("retrofitVersion")
