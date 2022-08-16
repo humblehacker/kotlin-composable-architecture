@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/humblehacker/kotlin-composable-architecture.svg)](https://jitpack.io/#humblehacker/kotlin-composable-architecture)
+
 # Kotlin Composable Architecture
 
 [![Kotlin](https://img.shields.io/badge/kotlin-1.4.21-orange)](https://kotlinlang.org/docs/tutorials/getting-started.html)
