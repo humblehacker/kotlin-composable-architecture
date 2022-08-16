@@ -39,6 +39,13 @@ data class CounterState(
 sealed class CounterAction {
     object DecrementButtonTapped : CounterAction()
     object IncrementButtonTapped : CounterAction()
+
+    override fun toString(): String {
+        return when (this) {
+            DecrementButtonTapped -> "CounterAction.DecrementButtonTapped"
+            IncrementButtonTapped -> "CounterAction.IncrementButtonTapped"
+        }
+    }
 }
 
 class CounterEnvironment
@@ -63,8 +70,8 @@ val counterReducer = Reducer<CounterState, CounterAction, CounterEnvironment> { 
 @Composable
 fun CounterView(
     store: ComposableStore<CounterState, CounterAction>,
-    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start
 ) {
     WithViewStore(store) { viewStore ->
         Row(
@@ -92,7 +99,6 @@ fun CounterDemoView(title: String, store: ComposableStore<CounterState, CounterA
         backgroundColor = Color(0xF0F0F0FF)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Top) {
-
             MarkdownText(readMe, style = MaterialTheme.typography.caption)
 
             Spacer(modifier = Modifier.height(16.dp))

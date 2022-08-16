@@ -135,6 +135,19 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
         }
     ),
     CaseStudy(
+        navTitle = "Pullback and combine - lists",
+        route = "01.getting-started.composition.list-basics",
+        composable = { store ->
+            ListBasicsView(
+                title = "List Basics Demo",
+                store.scope(
+                    state = RootState.listBasics,
+                    action = RootAction.listBasicsAction
+                )
+            )
+        }
+    ),
+    CaseStudy(
         navTitle = "Bindings",
         route = "01.getting-started.bindings-basics",
         composable = { store ->

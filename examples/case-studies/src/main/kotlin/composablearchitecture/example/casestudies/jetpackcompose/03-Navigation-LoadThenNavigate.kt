@@ -144,8 +144,8 @@ fun NavGraphBuilder.loadThenNavigateGraph(store: ComposableStore<LoadThenNavigat
                 then = {
                     CounterView(
                         store = it,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.Center
                     )
                 }
             )

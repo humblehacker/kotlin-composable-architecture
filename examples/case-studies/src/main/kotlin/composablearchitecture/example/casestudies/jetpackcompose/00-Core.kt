@@ -30,6 +30,7 @@ data class RootState(
     val longLivingEffects: LongLivingEffectsState = LongLivingEffectsState(),
     val optionalBasics: OptionalBasicsState = OptionalBasicsState(),
     val twoCounters: TwoCountersState = TwoCountersState(),
+    val listBasics: ListBasicsState = ListBasicsState(),
 ) : Parcelable {
     companion object
 }
@@ -44,6 +45,7 @@ sealed class RootAction {
     class NavigateAndLoad(val action: LoadThenNavigateAction) : RootAction()
     class OptionalBasics(val action: OptionalBasicsAction) : RootAction()
     class TwoCounters(val action: TwoCountersAction) : RootAction()
+    class ListBasics(val action: ListBasicsAction) : RootAction()
 
     override fun toString(): String {
         return when (this) {
@@ -56,6 +58,7 @@ sealed class RootAction {
             is NavigateAndLoad -> "RootAction.NavigateAndLoad(action=$action)"
             is OptionalBasics -> "RootAction.OptionalBasics(action=$action)"
             is TwoCounters -> "RootAction.TwoCounters(action=$action)"
+            is ListBasics -> "RootAction.ListBasics(action=$action)"
         }
     }
 
@@ -160,6 +163,17 @@ sealed class RootAction {
                 TwoCounters(action = action)
             }
         )
+        val listBasicsAction: Prism<RootAction, ListBasicsAction> = Prism(
+            getOrModify = { rootAction ->
+                when (rootAction) {
+                    is ListBasics -> rootAction.action.right()
+                    else -> rootAction.left()
+                }
+            },
+            reverseGet = { action ->
+                ListBasics(action = action)
+            }
+        )
     }
 }
 
@@ -230,6 +244,11 @@ val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
         toLocalState = RootState.twoCounters,
         toLocalAction = RootAction.twoCountersAction,
         toLocalEnvironment = { TwoCountersEnvironment() }
+    ),
+    listBasicsReducer.pullback(
+        toLocalState = RootState.listBasics,
+        toLocalAction = RootAction.listBasicsAction,
+        toLocalEnvironment = { ListBasicsEnvironment() }
     ),
 ).debug()
 
