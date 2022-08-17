@@ -26,11 +26,16 @@ inline fun <EachState : Identifiable<ID>, EachAction, ID : Any> LazyListScope.ea
     store: ComposableStore<List<EachState>, Pair<ID, EachAction>>,
     crossinline itemContent: @Composable LazyItemScope.(store: ComposableStore<EachState, EachAction>) -> Unit
 ) {
-    items(store.currentState.map { it.id }) { id ->
+    items(store.currentState) { item ->
         itemContent(
             store.scope(
-                state = { store.currentState.find { it.id == id }!! },
-                action = { localAction -> (id to localAction) }
+                state = {
+                    val childState = store.currentState.find { it.id == item.id }
+                    // NB: We use cached `item` here as a fallback to avoid a potential crash
+                    // where Compose may re-compose views for elements no longer in the collection.
+                    return@scope childState ?: item
+                },
+                action = { localAction -> (item.id to localAction) }
             )
         )
     }
