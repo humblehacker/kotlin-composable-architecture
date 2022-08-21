@@ -29,13 +29,13 @@ inline fun <EachState : Identifiable<ID>, EachAction, ID : Any> LazyListScope.ea
     items(store.currentState) { item ->
         itemContent(
             store.scope(
-                state = {
+                toLocalState = {
                     val childState = store.currentState.find { it.id == item.id }
                     // NB: We use cached `item` here as a fallback to avoid a potential crash
                     // where Compose may re-compose views for elements no longer in the collection.
                     return@scope childState ?: item
                 },
-                action = { localAction -> (item.id to localAction) }
+                fromLocalAction = { localAction -> (item.id to localAction) }
             )
         )
     }

@@ -48,8 +48,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion")
 
-    implementation("io.arrow-kt:arrow-optics:$arrowVersion")
-
     api(project(":composable-architecture"))
 
     // Jetpack Compose

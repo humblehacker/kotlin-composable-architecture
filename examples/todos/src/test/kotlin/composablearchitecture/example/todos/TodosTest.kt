@@ -23,11 +23,14 @@ class TodosTest {
             testDispatcher
         )
 
-        val scopedStore = store.scope(AppState.todos, TodoAction.prism)
+        val scopedStore = store.scope(
+            stateMap = AppState.todoState,
+            actionMap = AppAction.todoAction
+        )
 
         scopedStore.assert {
             send(todo.id to TodoAction.TextFieldChanged("Buy milk")) {
-                listOf(Todo.description.set(todo, "Buy milk"))
+                listOf(todo.copy(description = "Buy milk"))
             }
         }
     }

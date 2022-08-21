@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
-import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.android.ComposableStore
 import composablearchitecture.android.WithViewStore
@@ -48,7 +47,6 @@ Both effects are handled by the reducer, and a full test suite is written to con
 effects behave in the way we expect.
 """.replace("\\\n", "")
 
-@optics
 @Parcelize
 @Immutable
 data class EffectsBasicsState(

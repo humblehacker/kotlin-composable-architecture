@@ -1,10 +1,9 @@
 package composablearchitecture.example.search
 
-import arrow.core.left
-import arrow.core.right
 import composablearchitecture.test.TestStore
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlin.Result as KResult
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Test
 import retrofit2.HttpException
@@ -28,7 +27,7 @@ class SearchTests {
                 it.copy(searchQuery = "S")
             }
             doBlock { dispatcher.advanceTimeBy(300L) }
-            receive(SearchAction.LocationsResponse(mockLocations.right())) {
+            receive(SearchAction.LocationsResponse(KResult.success(mockLocations))) {
                 it.copy(locations = mockLocations)
             }
             send(SearchAction.SearchQueryChanged("")) {
@@ -51,7 +50,7 @@ class SearchTests {
             dispatcher
         )
 
-        val error = HttpException(Response.error<Unit>(500, "".toResponseBody())).left()
+        val error = KResult.failure<List<Location>>(HttpException(Response.error<Unit>(500, "".toResponseBody())))
 
         store.assert {
             environment {
@@ -61,7 +60,7 @@ class SearchTests {
                 it.copy(searchQuery = "S")
             }
             doBlock { dispatcher.advanceTimeBy(300L) }
-            receive(SearchAction.LocationsResponse(error))
+            receive(SearchAction.LocationsResponse( error ))
         }
     }
 
@@ -97,7 +96,7 @@ class SearchTests {
 
         val dispatcher = TestCoroutineDispatcher()
         val environment = SearchEnvironment(weatherClient = MockWeatherClient().apply {
-            weather = { specialLocationWeather.right() }
+            weather = { KResult.success(specialLocationWeather) }
         })
         val store = TestStore(
             SearchState(locations = mockLocations + specialLocation),
@@ -110,7 +109,7 @@ class SearchTests {
             send(SearchAction.LocationTapped(specialLocation)) {
                 it.copy(locationWeatherRequestInFlight = specialLocation)
             }
-            receive(SearchAction.LocationWeatherResponse(specialLocationWeather.right())) {
+            receive(SearchAction.LocationWeatherResponse(KResult.success(specialLocationWeather))) {
                 it.copy(
                     locationWeatherRequestInFlight = null,
                     locationWeather = specialLocationWeather
@@ -123,7 +122,7 @@ class SearchTests {
     fun `Tap on location failure`() = runTest {
         val dispatcher = TestCoroutineDispatcher()
 
-        val error = HttpException(Response.error<Unit>(500, "".toResponseBody())).left()
+        val error = KResult.failure<LocationWeather>(HttpException(Response.error<Unit>(500, "".toResponseBody())))
 
         val environment = SearchEnvironment(weatherClient = MockWeatherClient().apply {
             weather = { error }

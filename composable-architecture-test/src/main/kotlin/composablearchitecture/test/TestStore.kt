@@ -1,8 +1,8 @@
 package composablearchitecture.test
 
-import arrow.optics.Lens
-import arrow.optics.Prism
+import composablearchitecture.ActionMap
 import composablearchitecture.Reducer
+import composablearchitecture.StateMap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,8 +63,8 @@ private constructor(
     private var state: State,
     private val reducer: Reducer<State, Action, Environment>,
     private val environment: Environment,
-    private val toLocalState: Lens<State, LocalState>,
-    private val fromLocalAction: Prism<Action, LocalAction>,
+    private val stateMap: StateMap<State, LocalState>,
+    private val actionMap: ActionMap<Action, LocalAction>,
     private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
@@ -80,28 +80,28 @@ private constructor(
                 state,
                 reducer,
                 environment,
-                Lens.id(),
-                Prism.id(),
+                StateMap.id(),
+                ActionMap.id(),
                 testDispatcher
             )
     }
 
     fun <S, A> scope(
-        toLocalState: Lens<State, S>,
-        fromLocalAction: Prism<Action, A>
+        stateMap: StateMap<State, S>,
+        actionMap: ActionMap<Action, A>
     ): TestStore<State, S, Action, A, Environment> =
         TestStore(
             state,
             reducer,
             environment,
-            toLocalState,
-            fromLocalAction,
+            stateMap,
+            actionMap,
             testDispatcher
         )
 
     suspend fun assert(block: suspend AssertionBuilder<LocalAction, LocalState, Environment>.() -> Unit) {
         val assertion = AssertionBuilder<LocalAction, LocalState, Environment> {
-            toLocalState.get(state)
+            stateMap.toLocal(state)
         }
         assertion.block()
 
@@ -123,7 +123,7 @@ private constructor(
         }
 
         assertion.steps.forEach { step ->
-            var expectedState = toLocalState.get(state)
+            var expectedState = stateMap.toLocal(state)
 
             when (step) {
                 is Step.Send<LocalAction, LocalState, Environment> -> {
@@ -134,7 +134,7 @@ private constructor(
                         }
                         "Must handle all actions"
                     }
-                    runReducer(fromLocalAction.reverseGet(step.action))
+                    runReducer(actionMap.fromLocal(step.action))
                     expectedState = step.block(expectedState)
                 }
                 is Step.Receive<LocalAction, LocalState, Environment> -> {
@@ -145,7 +145,7 @@ private constructor(
                         println("received: $receivedAction")
                         "Actual and expected actions do not match"
                     }
-                    runReducer(fromLocalAction.reverseGet(step.action))
+                    runReducer(actionMap.fromLocal(step.action))
                     expectedState = step.block(expectedState)
                 }
                 is Step.Environment<LocalAction, LocalState, Environment> -> {
@@ -157,7 +157,7 @@ private constructor(
                 is Step.AdvanceUntilIdle -> testDispatcher.scheduler.advanceUntilIdle()
             }
 
-            val actualState = toLocalState.get(state)
+            val actualState = stateMap.toLocal(state)
             require(actualState == expectedState) {
                 println(actualState)
                 println("---vs---")

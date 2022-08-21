@@ -34,9 +34,9 @@ class TodosActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
 
         vm.launch(
-            TodosApp.store,
-            AppState.todos,
-            TodoAction.prism
+            globalStore = TodosApp.store,
+            toLocalState = { it.todos },
+            fromLocalAction = { (id, action) -> AppAction.Todo(id, action) }
         )
             .invokeOnCompletion { println("TodosActivityViewModel is disposed $it") }
 

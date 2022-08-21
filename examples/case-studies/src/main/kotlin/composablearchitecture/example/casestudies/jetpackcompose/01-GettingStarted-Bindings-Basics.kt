@@ -20,7 +20,6 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.unit.dp
-import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.android.ComposableStore
 import composablearchitecture.android.ViewStore
@@ -52,7 +51,6 @@ does not demonstrate bindings. It is only implemented for parity. Original readm
 > component changes, which means you can keep using a unidirectional style for your feature.
 """.replace("\\\n", "")
 
-@optics
 @Parcelize
 @Immutable
 data class BindingBasicsState(

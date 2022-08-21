@@ -1,6 +1,5 @@
 package composablearchitecture.example.tictactoe
 
-import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.debug
 import composablearchitecture.withNoEffect
@@ -24,7 +23,6 @@ sealed class GameAction: Comparable<GameAction> {
 
 object GameEnvironment
 
-@optics
 data class GameState(
     val board: Board = Board(),
     val currentPlayer: Player = Player.X,

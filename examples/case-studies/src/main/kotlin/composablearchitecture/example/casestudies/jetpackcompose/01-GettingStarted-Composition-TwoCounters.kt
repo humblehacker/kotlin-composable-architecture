@@ -10,12 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import arrow.core.left
-import arrow.core.right
-import arrow.optics.PPrism
-import arrow.optics.Prism
-import arrow.optics.optics
+import composablearchitecture.ActionMap
 import composablearchitecture.Reducer
+import composablearchitecture.StateMap
 import composablearchitecture.android.ComposableStore
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.parcelize.Parcelize
@@ -27,14 +24,22 @@ This screen demonstrates how to take small features and compose them into bigger
 It reuses the the domain of the counter screen and embeds it, twice, in a larger domain.
 """.replace("\\\n", "")
 
-@optics
 @Parcelize
 @Immutable
 data class TwoCountersState(
     val counter1: CounterState = CounterState(),
     val counter2: CounterState = CounterState()
 ) : Parcelable {
-    companion object
+    companion object {
+        val counter1State = StateMap<TwoCountersState, CounterState>(
+            toLocal = { it.counter1 },
+            fromLocal = { ls, gs -> gs.copy(counter1 = ls) }
+        )
+        val counter2State = StateMap<TwoCountersState, CounterState>(
+            toLocal = { it.counter2 },
+            fromLocal = { ls, gs -> gs.copy(counter2 = ls) }
+        )
+    }
 }
 
 sealed class TwoCountersAction {
@@ -42,28 +47,14 @@ sealed class TwoCountersAction {
     class Counter2(val action: CounterAction) : TwoCountersAction()
 
     companion object {
-        val counter1Action: Prism<TwoCountersAction, CounterAction> = PPrism(
-            getOrModify = { action ->
-                when (action) {
-                    is Counter1 -> action.action.right()
-                    else -> action.left()
-                }
-            },
-            reverseGet = { action ->
-                Counter1(action)
-            }
+        val counter1Action = ActionMap<TwoCountersAction, CounterAction>(
+            toLocal = { if (it is Counter1) it.action else null },
+            fromLocal = { Counter1(it) }
         )
 
-        val counter2Action: Prism<TwoCountersAction, CounterAction> = PPrism(
-            getOrModify = { action ->
-                when (action) {
-                    is Counter2 -> action.action.right()
-                    else -> action.left()
-                }
-            },
-            reverseGet = { action ->
-                Counter2(action)
-            }
+        val counter2Action = ActionMap<TwoCountersAction, CounterAction>(
+            toLocal = { if (it is Counter2) it.action else null },
+            fromLocal = { Counter2(it) }
         )
     }
 }
@@ -71,14 +62,14 @@ sealed class TwoCountersAction {
 class TwoCountersEnvironment
 
 val twoCountersReducer = Reducer.combine(
-    counterReducer.pullback<TwoCountersState, TwoCountersAction, TwoCountersEnvironment>(
-        toLocalState = TwoCountersState.counter1,
-        toLocalAction = TwoCountersAction.counter1Action,
-        toLocalEnvironment = { CounterEnvironment() }
+    counterReducer.pullback(
+        stateMap = TwoCountersState.counter1State,
+        actionMap = TwoCountersAction.counter1Action,
+        toLocalEnvironment = { _: TwoCountersEnvironment -> CounterEnvironment() }
     ),
     counterReducer.pullback(
-        toLocalState = TwoCountersState.counter2,
-        toLocalAction = TwoCountersAction.counter2Action,
+        stateMap = TwoCountersState.counter2State,
+        actionMap = TwoCountersAction.counter2Action,
         toLocalEnvironment = { CounterEnvironment() }
     )
 )
@@ -100,8 +91,8 @@ fun TwoCountersView(title: String, store: ComposableStore<TwoCountersState, TwoC
                     CounterRow(
                         "Counter 1",
                         store.scope(
-                            state = TwoCountersState.counter1,
-                            action = TwoCountersAction.counter1Action
+                            toLocalState = { it.counter1 },
+                            fromLocalAction = { TwoCountersAction.Counter1(it) }
                         )
                     )
 
@@ -110,8 +101,8 @@ fun TwoCountersView(title: String, store: ComposableStore<TwoCountersState, TwoC
                     CounterRow(
                         "Counter 2",
                         store.scope(
-                            state = TwoCountersState.counter2,
-                            action = TwoCountersAction.counter2Action
+                            toLocalState = { it.counter2 },
+                            fromLocalAction = { TwoCountersAction.Counter2(it) }
                         )
                     )
                 }

@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
-import arrow.optics.optics
 import composablearchitecture.*
 import composablearchitecture.android.ComposableStore
 import composablearchitecture.android.ViewStore
@@ -37,7 +36,6 @@ it from feeding data back into the application. Interacting with the stepper whi
 request is in-flight will also cancel it.
 """.replace("\\\n", "")
 
-@optics
 @Parcelize
 @Immutable
 data class EffectsCancellationState(

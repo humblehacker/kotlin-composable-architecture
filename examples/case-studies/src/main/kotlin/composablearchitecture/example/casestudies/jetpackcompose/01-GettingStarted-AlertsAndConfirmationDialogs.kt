@@ -11,7 +11,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.android.*
 import composablearchitecture.withNoEffect
@@ -33,7 +32,6 @@ alerts and dialogs in your application
 
 // TODO: Add ConfirmationDialog
 
-@optics
 @Parcelize
 @Immutable
 data class AlertAndConfirmationDialogState(
@@ -143,7 +141,7 @@ fun AlertAndConfirmationDialogView(
                 }
 
                 Alert(
-                    store = store.scope(state = AlertAndConfirmationDialogState.nullableAlert),
+                    store = store.scope(toLocalState = { it.alert }),
                     dismiss = AlertAndConfirmationDialogAction.AlertDismissed)
             }
         }

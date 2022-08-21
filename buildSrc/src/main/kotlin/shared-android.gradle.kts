@@ -1,8 +1,6 @@
 plugins {
-    `idea`
     id("com.android.application")
-    id("kotlin-android")
-    id("com.google.devtools.ksp")
+    kotlin("android")
 }
 
 @Suppress("UnstableApiUsage")
@@ -49,15 +47,6 @@ android {
     sourceSets["test"].java.srcDir("src/test/kotlin")
 }
 
-idea {
-    module {
-        // Not using += due to https://github.com/gradle/gradle/issues/8749
-        sourceDirs = sourceDirs + file("build/generated/ksp/main/kotlin")
-        testSourceDirs = testSourceDirs + file("build/generated/ksp/test/kotlin")
-        generatedSourceDirs = generatedSourceDirs + file("build/generated/ksp/main/kotlin") + file("build/generated/ksp/test/kotlin")
-    }
-}
-
 dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:$androidxEspressoVersion")
     androidTestImplementation("androidx.test.ext:junit:$androidxJunitVersion")
@@ -79,9 +68,6 @@ dependencies {
 
     implementation(project(":composable-architecture"))
     implementation(project(":composable-architecture-android"))
-
-    implementation("io.arrow-kt:arrow-optics:$arrowVersion")
-    ksp("io.arrow-kt:arrow-optics-ksp-plugin:$arrowVersion")
 
     testImplementation("junit:junit:$junitVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")

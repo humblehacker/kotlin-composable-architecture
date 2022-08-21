@@ -59,7 +59,9 @@ In Kotlin, enums cannot function as algebraic data types. We get to define a sin
 
 ### Lack of KeyPaths and CasePaths
 
-The Swift compiler has a powerful feature: it generates `KeyPath`s for each struct in our application. Point-Free has implemented a companion library called [swift-case-paths](https://github.com/pointfreeco/swift-case-paths), which provides the same ergonomics for enums. The Swift Composable Architecture uses these two tools to abstract over getters and setters for state and action. In Kotlin, we don't have similar tools, so we rely on code generation through the [Arrow Meta](https://github.com/arrow-kt/arrow) library. Arrow has a module called Optics, which can be utilized to define `Lens`es and `Prism`s to substitute `KeyPath`s and `CasePath`s.
+The Swift compiler has a powerful feature: it generates `KeyPath`s for each struct in our application. Point-Free has implemented a companion library called [swift-case-paths](https://github.com/pointfreeco/swift-case-paths), which provides the same ergonomics for enums. The Swift Composable Architecture uses these two tools to abstract over getters and setters for state and action. In Kotlin, we don't have similar tools, so ~~we rely on code generation through the [Arrow Meta](https://github.com/arrow-kt/arrow) library. Arrow has a module called Optics, which can be utilized to define `Lens`es and `Prism`s to substitute `KeyPath`s and `CasePath`s.~~
+
+Support for Arrow has been removed so we can support Kotlin 1.7. Arrow may return as an add-on feature in the future.
 
 ### Combine vs Coroutines
 

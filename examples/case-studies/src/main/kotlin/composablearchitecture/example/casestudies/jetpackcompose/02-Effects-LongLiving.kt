@@ -24,7 +24,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import arrow.optics.optics
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import composablearchitecture.*
@@ -46,7 +45,6 @@ Then, navigate to another screen and take screenshots there, and observe that th
 *not* count those screenshots.
 """.replace("\\\n", "")
 
-@optics
 @Parcelize
 @Immutable
 data class LongLivingEffectsState(

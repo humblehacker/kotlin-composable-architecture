@@ -19,16 +19,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import arrow.core.left
-import arrow.core.right
-import arrow.optics.PPrism
-import arrow.optics.Prism
-import arrow.optics.optics
-import composablearchitecture.*
+import composablearchitecture.ActionMap
+import composablearchitecture.Reducer
+import composablearchitecture.StateMap
 import composablearchitecture.android.ComposableStore
 import composablearchitecture.android.IfLetStore
 import composablearchitecture.android.NavigationLink
 import composablearchitecture.android.WithViewStore
+import composablearchitecture.cancel
+import composablearchitecture.cancellable
+import composablearchitecture.withEffect
+import composablearchitecture.withNoEffect
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.delay
 import kotlinx.parcelize.Parcelize
@@ -41,7 +42,6 @@ Tapping "Load optional counter" simultaneously navigates to a screen that depend
 counter state and fires off an effect that will load this state a second later.
 """.replace("\\\n", "")
 
-@optics
 @Parcelize
 data class LoadThenNavigateState(
     val optionalCounter: CounterState? = null,
@@ -49,13 +49,18 @@ data class LoadThenNavigateState(
 ) : Parcelable {
     val isNavigationActive: Boolean get() = optionalCounter != null
 
-    companion object
+    companion object {
+        val optionalCounterState: StateMap<LoadThenNavigateState, CounterState?> = StateMap(
+            toLocal = { it.optionalCounter },
+            fromLocal = { ls, gs -> gs.copy(optionalCounter = ls) }
+        )
+    }
 }
 
 sealed class LoadThenNavigateAction {
     object OnDisappear : LoadThenNavigateAction()
-    class OptionalCounter(val action: CounterAction) : LoadThenNavigateAction()
-    class SetNavigation(val isActive: Boolean) : LoadThenNavigateAction()
+    data class OptionalCounter(val action: CounterAction) : LoadThenNavigateAction()
+    data class SetNavigation(val isActive: Boolean) : LoadThenNavigateAction()
     object SetNavigationIsActiveDelayCompleted : LoadThenNavigateAction()
 
     override fun toString(): String {
@@ -68,14 +73,9 @@ sealed class LoadThenNavigateAction {
     }
 
     companion object {
-        val optionalCounterAction: Prism<LoadThenNavigateAction, CounterAction> = PPrism(
-            getOrModify = { obAction ->
-                when (obAction) {
-                    is OptionalCounter -> obAction.action.right()
-                    else -> obAction.left()
-                }
-            },
-            reverseGet = { action -> OptionalCounter(action) }
+        val optionalCounterAction: ActionMap<LoadThenNavigateAction, CounterAction> = ActionMap(
+            toLocal = { if (it is OptionalCounter) it.action else null },
+            fromLocal = ::OptionalCounter,
         )
     }
 }
@@ -85,10 +85,10 @@ class LoadThenNavigateEnvironment
 val loadThenNavigateReducer =
     counterReducer
         .optional()
-        .pullback(
-            toLocalState = LoadThenNavigateState.nullableOptionalCounter,
-            toLocalAction = LoadThenNavigateAction.optionalCounterAction,
-            toLocalEnvironment = { _: LoadThenNavigateEnvironment -> CounterEnvironment() }
+        .pullback<LoadThenNavigateState, LoadThenNavigateAction, LoadThenNavigateEnvironment>(
+            stateMap = LoadThenNavigateState.optionalCounterState,
+            actionMap = LoadThenNavigateAction.optionalCounterAction,
+            toLocalEnvironment = { CounterEnvironment() }
         )
         .combine(
             other = Reducer { state, action, _ ->
@@ -137,9 +137,9 @@ fun NavGraphBuilder.loadThenNavigateGraph(store: ComposableStore<LoadThenNavigat
     navigation(startDestination = "counterview", route = "load-then-navigate") {
         composable("counterview") {
             IfLetStore(
-                store.scope(
-                    state = LoadThenNavigateState.nullableOptionalCounter,
-                    action = LoadThenNavigateAction.optionalCounterAction
+                store.scope<CounterState?, CounterAction>(
+                    toLocalState = { it.optionalCounter },
+                    fromLocalAction = { LoadThenNavigateAction.OptionalCounter(it) }
                 ),
                 then = {
                     CounterView(

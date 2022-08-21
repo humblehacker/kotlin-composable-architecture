@@ -11,14 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import arrow.core.left
-import arrow.core.right
-import arrow.optics.PPrism
-import arrow.optics.Prism
-import arrow.optics.optics
+import composablearchitecture.ActionMap
 import composablearchitecture.Reducer
 import composablearchitecture.android.ComposableStore
 import composablearchitecture.Identifiable
+import composablearchitecture.StateMap
 import composablearchitecture.android.WithViewStore
 import composablearchitecture.android.eachStore
 import composablearchitecture.debug
@@ -40,7 +37,6 @@ data class IdentifiedCounterState(
     companion object
 }
 
-@optics
 @Parcelize
 @Immutable
 data class ListBasicsState(
@@ -51,7 +47,12 @@ data class ListBasicsState(
         IdentifiedCounterState("D"),
     )
 ) : Parcelable {
-    companion object
+    companion object {
+        val countersState: StateMap<ListBasicsState, List<IdentifiedCounterState>> = StateMap(
+            toLocal = { it.counters },
+            fromLocal = { ls, gs -> gs.copy(counters = ls) }
+        )
+    }
 }
 
 sealed class ListBasicsAction {
@@ -64,16 +65,9 @@ sealed class ListBasicsAction {
     }
 
     companion object {
-        val countersAction: Prism<ListBasicsAction, Pair<String, CounterAction>> = PPrism(
-            getOrModify = { outerAction ->
-                when (outerAction) {
-                    is Counter -> (outerAction.id to outerAction.action).right()
-                    else -> outerAction.left()
-                }
-            },
-            reverseGet = { (id, action) ->
-                Counter(id, action)
-            }
+        val countersAction: ActionMap<ListBasicsAction, Pair<String, CounterAction>> = ActionMap(
+            toLocal = { if (it is Counter) (it.id to it.action) else null },
+            fromLocal = { (id, action) -> Counter(id, action) }
         )
     }
 }
@@ -98,11 +92,11 @@ val identifiedCounterReducer =
         }
     }
 
-val listBasicsReducer = Reducer.combine(
+val listBasicsReducer = Reducer.combine<ListBasicsState, ListBasicsAction, ListBasicsEnvironment>(
     identifiedCounterReducer
-        .forEach<ListBasicsState, ListBasicsAction, ListBasicsEnvironment, String>(
-            toLocalState = ListBasicsState.counters,
-            toLocalAction = ListBasicsAction.countersAction,
+        .forEach(
+            stateMap = ListBasicsState.countersState,
+            actionMap = ListBasicsAction.countersAction,
             toLocalEnvironment = { CounterEnvironment() },
             idGetter = { it.id }
         )
@@ -123,8 +117,8 @@ fun ListBasicsView(title: String, store: ComposableStore<ListBasicsState, ListBa
                 LazyColumn {
                     eachStore(
                         store.scope(
-                            state = ListBasicsState.counters,
-                            action = ListBasicsAction.countersAction
+                            stateMap = ListBasicsState.countersState,
+                            actionMap = ListBasicsAction.countersAction
                         )
                     ) { childStore ->
                         CounterRow("Counter ${childStore.currentState.id}", childStore)

@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.android.ComposableStore
 import composablearchitecture.android.WithViewStore
@@ -27,7 +26,6 @@ The domain of the application is modeled using simple data types that correspond
 state of the application and any actions that can affect that state or the outside world.
 """.replace("\\\n", "")
 
-@optics
 @Parcelize
 @Immutable
 data class CounterState(
@@ -50,7 +48,9 @@ sealed class CounterAction {
 
 class CounterEnvironment
 
-val counterReducer = Reducer<CounterState, CounterAction, CounterEnvironment> { state, action, _ ->
+typealias CounterReducer = Reducer<CounterState, CounterAction, CounterEnvironment>
+
+val counterReducer = CounterReducer { state, action, _ ->
     when (action) {
 
         CounterAction.DecrementButtonTapped -> {
