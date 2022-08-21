@@ -23,6 +23,7 @@ import composablearchitecture.android.WithViewStore
 import composablearchitecture.android.eachStore
 import composablearchitecture.debug
 import composablearchitecture.withNoEffect
+import composablearchitecture.arrow.forEach
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.parcelize.Parcelize
 
@@ -100,10 +101,10 @@ val identifiedCounterReducer =
 
 val listBasicsReducer = Reducer.combine(
     identifiedCounterReducer
-        .forEach<ListBasicsState, ListBasicsAction, ListBasicsEnvironment, String>(
+        .forEach(
             toLocalState = ListBasicsState.counters,
             toLocalAction = ListBasicsAction.countersAction,
-            toLocalEnvironment = { CounterEnvironment() },
+            toLocalEnvironment = { _: ListBasicsEnvironment -> CounterEnvironment() },
             idGetter = { it.id }
         )
 ).debug()

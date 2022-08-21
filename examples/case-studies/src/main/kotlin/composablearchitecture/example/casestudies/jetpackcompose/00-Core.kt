@@ -13,6 +13,7 @@ import composablearchitecture.Reducer
 import composablearchitecture.debug
 import composablearchitecture.example.casestudies.jetpackcompose.extras.ScreenshotDetector
 import composablearchitecture.withNoEffect
+import composablearchitecture.arrow.pullback
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.parcelize.Parcelize

@@ -48,9 +48,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion")
 
-    implementation("io.arrow-kt:arrow-optics:$arrowVersion")
-
     api(project(":composable-architecture"))
+    api(project(":composable-architecture")) {
+        capabilities {
+            requireCapability("composable-architecture:composable-architecture-arrow:$arrowVersion")
+        }
+    }
 
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:$kotlinComposeVersion")

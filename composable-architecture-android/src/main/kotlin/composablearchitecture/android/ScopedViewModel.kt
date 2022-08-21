@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import arrow.optics.Lens
 import arrow.optics.Prism
 import composablearchitecture.Store
+import composablearchitecture.arrow.scope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 open class ScopedViewModel<State, Action> : ViewModel() {
@@ -22,6 +22,17 @@ open class ScopedViewModel<State, Action> : ViewModel() {
         prism: Prism<GlobalAction, Action>
     ): Job {
         store = globalStore.scope(lens, prism, viewModelScope)
+        return viewModelScope.launch {
+            store.states.collect { state.value = it }
+        }
+    }
+
+    fun <GlobalState, GlobalAction> launch(
+        globalStore: Store<GlobalState, GlobalAction>,
+        toLocalState: (GlobalState) -> State,
+        fromLocalAction: (Action) -> GlobalAction,
+    ): Job {
+        store = globalStore.scope(toLocalState, fromLocalAction, viewModelScope)
         return viewModelScope.launch {
             store.states.collect { state.value = it }
         }

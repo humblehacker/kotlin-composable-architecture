@@ -17,6 +17,7 @@ import arrow.optics.Prism
 import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.android.ComposableStore
+import composablearchitecture.arrow.pullback
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.parcelize.Parcelize
 
@@ -71,10 +72,10 @@ sealed class TwoCountersAction {
 class TwoCountersEnvironment
 
 val twoCountersReducer = Reducer.combine(
-    counterReducer.pullback<TwoCountersState, TwoCountersAction, TwoCountersEnvironment>(
+    counterReducer.pullback(
         toLocalState = TwoCountersState.counter1,
         toLocalAction = TwoCountersAction.counter1Action,
-        toLocalEnvironment = { CounterEnvironment() }
+        toLocalEnvironment = { _: TwoCountersEnvironment -> CounterEnvironment() }
     ),
     counterReducer.pullback(
         toLocalState = TwoCountersState.counter2,

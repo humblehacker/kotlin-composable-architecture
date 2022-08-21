@@ -1,4 +1,4 @@
-package composablearchitecture
+package composablearchitecture.arrow
 
 import arrow.core.Either
 import arrow.core.left
@@ -7,6 +7,7 @@ import arrow.optics.Lens
 import arrow.optics.Optional
 import arrow.optics.dsl.index
 import arrow.optics.typeclasses.Index
+import composablearchitecture.update
 
 private fun <A> listIndex(): Index<List<A>, Int, A> = object : Index<List<A>, Int, A> {
     override fun index(i: Int): Optional<List<A>, A> = object : Optional<List<A>, A> {

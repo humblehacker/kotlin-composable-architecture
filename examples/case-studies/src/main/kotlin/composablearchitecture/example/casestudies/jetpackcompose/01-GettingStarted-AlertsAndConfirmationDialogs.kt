@@ -15,6 +15,7 @@ import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.android.*
 import composablearchitecture.withNoEffect
+import composablearchitecture.arrow.scope
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.parcelize.Parcelize
 

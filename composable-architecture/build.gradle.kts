@@ -1,8 +1,17 @@
 plugins {
-    `idea`
+    idea
     id("kotlin")
     id("com.google.devtools.ksp")
     `maven-publish`
+}
+
+var arrow = sourceSets.create("arrow")
+
+java {
+    registerFeature("arrow") {
+        usingSourceSet(arrow)
+        capability(project.group.toString(), "${project.name}-arrow", project.version.toString())
+    }
 }
 
 publishing {
@@ -30,8 +39,12 @@ idea {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("io.arrow-kt:arrow-optics:$arrowVersion")
+
+    "arrowApi"("io.arrow-kt:arrow-optics:$arrowVersion")
+    "arrowImplementation"(project(path))
+    "arrowImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     ksp("io.arrow-kt:arrow-optics-ksp-plugin:$arrowVersion")
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testImplementation(project(":composable-architecture-test"))

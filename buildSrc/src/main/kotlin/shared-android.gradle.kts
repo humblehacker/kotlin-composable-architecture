@@ -1,5 +1,5 @@
 plugins {
-    `idea`
+    idea
     id("com.android.application")
     id("kotlin-android")
     id("com.google.devtools.ksp")
@@ -78,9 +78,13 @@ dependencies {
     implementation("androidx.navigation:navigation-runtime-ktx:$androidxNavigationVersion")
 
     implementation(project(":composable-architecture"))
+    implementation(project(":composable-architecture")) {
+        capabilities {
+            requireCapability("composable-architecture:composable-architecture-arrow:$arrowVersion")
+        }
+    }
     implementation(project(":composable-architecture-android"))
 
-    implementation("io.arrow-kt:arrow-optics:$arrowVersion")
     ksp("io.arrow-kt:arrow-optics-ksp-plugin:$arrowVersion")
 
     testImplementation("junit:junit:$junitVersion")
