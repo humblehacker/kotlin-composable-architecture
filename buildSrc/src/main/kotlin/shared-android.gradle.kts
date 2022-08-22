@@ -15,6 +15,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        missingDimensionStrategy("ext", "arrow")
     }
 
     buildFeatures {
@@ -77,14 +78,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$androidxNavigationVersion")
     implementation("androidx.navigation:navigation-runtime-ktx:$androidxNavigationVersion")
 
-    implementation(project(":composable-architecture"))
-    implementation(project(":composable-architecture")) {
-        capabilities {
-            requireCapability("composable-architecture:composable-architecture-arrow:$arrowVersion")
-        }
-    }
+    // Note: we choose the "arrow" flavor of this library via `missingDimensionStrategy` in `defaultConfig`
     implementation(project(":composable-architecture-android"))
-
     ksp("io.arrow-kt:arrow-optics-ksp-plugin:$arrowVersion")
 
     testImplementation("junit:junit:$junitVersion")

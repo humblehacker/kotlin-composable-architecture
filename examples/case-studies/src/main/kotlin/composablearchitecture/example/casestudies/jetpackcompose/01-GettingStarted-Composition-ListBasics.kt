@@ -16,14 +16,15 @@ import arrow.core.right
 import arrow.optics.PPrism
 import arrow.optics.Prism
 import arrow.optics.optics
+import composablearchitecture.Identifiable
 import composablearchitecture.Reducer
 import composablearchitecture.android.ComposableStore
-import composablearchitecture.Identifiable
 import composablearchitecture.android.WithViewStore
+import composablearchitecture.android.arrow.scope
 import composablearchitecture.android.eachStore
+import composablearchitecture.arrow.forEach
 import composablearchitecture.debug
 import composablearchitecture.withNoEffect
-import composablearchitecture.arrow.forEach
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.parcelize.Parcelize
 

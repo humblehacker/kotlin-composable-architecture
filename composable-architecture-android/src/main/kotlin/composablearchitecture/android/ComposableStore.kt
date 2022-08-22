@@ -1,21 +1,18 @@
 package composablearchitecture.android
 
 import androidx.compose.runtime.Stable
-import arrow.optics.Lens
-import arrow.optics.Prism
 import composablearchitecture.ActionMap
 import composablearchitecture.Reducer
 import composablearchitecture.Result
 import composablearchitecture.StateMap
 import composablearchitecture.Store
-import composablearchitecture.arrow.scope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 
 @Stable
-class ComposableStore<State, Action> private constructor(
+class ComposableStore<State, Action> internal constructor(
     val store: Store<State, Action>,
     val navigateTo: (route: String, onDismiss: () -> Unit) -> Unit,
     val popBackStack: () -> Unit
@@ -31,16 +28,6 @@ class ComposableStore<State, Action> private constructor(
     val currentState get() = store.currentState
     val states: Flow<State> get() = store.states
     fun send(action: Action) = store.send(action)
-
-    fun <LocalState, LocalAction> scope(
-        state: Lens<State, LocalState>,
-        action: Prism<Action, LocalAction>
-    ): ComposableStore<LocalState, LocalAction> =
-        ComposableStore(
-            store = store.scope(state, action, CoroutineScope(Dispatchers.Main)),
-            navigateTo = navigateTo,
-            popBackStack = popBackStack
-        )
 
     fun <LocalState, LocalAction> scope(
         stateMap: StateMap<State, LocalState>,
@@ -62,16 +49,6 @@ class ComposableStore<State, Action> private constructor(
             navigateTo = navigateTo,
             popBackStack = popBackStack
         )
-
-    fun <LocalState> scope(
-        state: Lens<State, LocalState>
-    ): ComposableStore<LocalState, Action> {
-        return ComposableStore(
-            store = store.scope(state, CoroutineScope(Dispatchers.Main)),
-            navigateTo = navigateTo,
-            popBackStack = popBackStack
-        )
-    }
 
     fun <LocalState> scope(
         stateMap: StateMap<State, LocalState>

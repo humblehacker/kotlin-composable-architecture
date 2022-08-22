@@ -17,6 +17,7 @@ import arrow.optics.Prism
 import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.android.ComposableStore
+import composablearchitecture.android.arrow.scope
 import composablearchitecture.arrow.pullback
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.parcelize.Parcelize

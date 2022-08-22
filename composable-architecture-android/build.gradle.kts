@@ -7,7 +7,6 @@ plugins {
 
 android {
     compileSdk = androidCompileSdkVersion
-    sourceSets["main"].java.srcDir("src/main/kotlin")
     buildFeatures {
         compose = true
     }
@@ -19,6 +18,15 @@ android {
         aarMetadata {
             minCompileSdk = androidCompileSdkVersion
             minSdk = androidMinSdkVersion
+        }
+    }
+    flavorDimensions += "ext"
+    productFlavors {
+        create("default") {
+            dimension = "ext"
+        }
+        create("arrow") {
+            dimension = "ext"
         }
     }
     publishing {
@@ -37,7 +45,15 @@ publishing {
             artifactId = "composable-architecture-android"
 
             afterEvaluate {
-                from(components["release"])
+                from(components["defaultRelease"])
+            }
+        }
+        register<MavenPublication>("arrow") {
+            groupId = "com.humblehacker"
+            artifactId = "composable-architecture-android-arrow"
+
+            afterEvaluate {
+                from(components["arrowRelease"])
             }
         }
     }
@@ -48,12 +64,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion")
 
-    api(project(":composable-architecture"))
-    api(project(":composable-architecture")) {
+    "arrowApi"(project(":composable-architecture")) {
         capabilities {
             requireCapability("composable-architecture:composable-architecture-arrow:$arrowVersion")
         }
     }
+    "defaultApi"(project(":composable-architecture"))
 
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:$kotlinComposeVersion")

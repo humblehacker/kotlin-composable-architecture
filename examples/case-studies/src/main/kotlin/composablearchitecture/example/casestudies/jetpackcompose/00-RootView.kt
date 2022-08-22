@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import composablearchitecture.android.ComposableStore
+import composablearchitecture.android.arrow.scope
 import composablearchitecture.example.casestudies.jetpackcompose.extras.NotYetImplementedView
 
 val backgroundColor = Color(0xF0F0F0FF)

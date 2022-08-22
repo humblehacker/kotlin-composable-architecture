@@ -41,7 +41,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 
     "arrowApi"("io.arrow-kt:arrow-optics:$arrowVersion")
-    "arrowImplementation"(project(path))
+    "arrowApi"(project(path))
     "arrowImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     ksp("io.arrow-kt:arrow-optics-ksp-plugin:$arrowVersion")
 
