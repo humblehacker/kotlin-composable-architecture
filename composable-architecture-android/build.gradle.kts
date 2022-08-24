@@ -12,7 +12,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.1"
+        kotlinCompilerExtensionVersion = kotlinComposeCompilerVersion
     }
     namespace = "composablearchitecture.android"
     defaultConfig {

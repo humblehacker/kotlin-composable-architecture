@@ -17,6 +17,7 @@ val Project.androidxRecyclerviewVersion: String get() = props.getProperty("andro
 val Project.coroutinesVersion: String get() = props.getProperty("coroutinesVersion")
 val Project.junitVersion: String get() = props.getProperty("junitVersion")
 val Project.kotlinComposeVersion: String get() = props.getProperty("kotlinComposeVersion")
+val Project.kotlinComposeCompilerVersion: String get() = props.getProperty("kotlinComposeCompilerVersion")
 val Project.kotlinVersion: String get() = props.getProperty("kotlinVersion")
 val Project.moshiVersion: String get() = props.getProperty("moshiVersion")
 val Project.okhttpVersion: String get() = props.getProperty("okhttpVersion")

@@ -14,7 +14,7 @@ android {
         shaders = false
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = kotlinComposeVersion
+        kotlinCompilerExtensionVersion = kotlinComposeCompilerVersion
     }
     namespace = "composablearchitecture.example.search"
 }
