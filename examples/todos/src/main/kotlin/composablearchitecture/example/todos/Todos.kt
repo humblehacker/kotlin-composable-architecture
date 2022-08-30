@@ -1,10 +1,8 @@
 package composablearchitecture.example.todos
 
-import arrow.core.left
-import arrow.core.right
-import arrow.optics.Prism
-import arrow.optics.optics
+import composablearchitecture.ActionMap
 import composablearchitecture.Reducer
+import composablearchitecture.StateMap
 import composablearchitecture.cancellable
 import composablearchitecture.debug
 import composablearchitecture.withEffect
@@ -12,7 +10,6 @@ import composablearchitecture.withNoEffect
 import kotlinx.coroutines.delay
 import java.util.UUID
 
-@optics
 data class Todo(
     var description: String = "",
     val id: UUID,
@@ -25,17 +22,6 @@ sealed class TodoAction {
     class CheckBoxToggled(val checked: Boolean) : TodoAction()
     class TextFieldChanged(val text: String) : TodoAction()
 
-    companion object {
-        val prism: Prism<AppAction, Pair<UUID, TodoAction>> = Prism(
-            getOrModify = { appAction ->
-                when (appAction) {
-                    is AppAction.Todo -> (appAction.id to appAction.action).right()
-                    else -> appAction.left()
-                }
-            },
-            reverseGet = { (id, action) -> AppAction.Todo(id, action) }
-        )
-    }
 }
 
 object TodoEnvironment
@@ -64,13 +50,17 @@ enum class Filter {
     Completed
 }
 
-@optics
 data class AppState(
     val editMode: EditMode = EditMode.inactive,
     val filter: Filter = Filter.All,
     val todos: List<Todo> = emptyList()
 ) {
-    companion object
+    companion object {
+        val todoState = StateMap<AppState, List<Todo>>(
+            toLocal = { it.todos },
+            fromLocal = { ls, gs -> gs.copy(todos = ls) }
+        )
+    }
 
     val filteredTodos: List<Todo>
         get() = when (filter) {
@@ -95,6 +85,13 @@ sealed class AppAction : Comparable<AppAction> {
     class Todo(val id: UUID, val action: TodoAction) : AppAction()
 
     override fun compareTo(other: AppAction): Int = this.compareTo(other)
+
+    companion object {
+        val todoAction = ActionMap<AppAction, Pair<UUID, TodoAction>>(
+            toLocal = { if (it is AppAction.Todo) (it.id to it.action) else null },
+            fromLocal = { (id, action) -> AppAction.Todo(id, action) }
+        )
+    }
 }
 
 class AppEnvironment(
@@ -131,10 +128,10 @@ val appReducer = Reducer
             }
         },
         todoReducer.forEach(
-            toLocalState = AppState.todos,
-            toLocalAction = TodoAction.prism,
+            stateMap = AppState.todoState,
+            actionMap = AppAction.todoAction,
             toLocalEnvironment = { TodoEnvironment },
-            idGetter = Todo.id
+            idGetter = { it.id }
         )
     )
     .debug()

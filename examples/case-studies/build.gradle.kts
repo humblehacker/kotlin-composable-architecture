@@ -12,16 +12,16 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = kotlinComposeVersion
+        kotlinCompilerExtensionVersion = kotlinComposeCompilerVersion
     }
     namespace = "composablearchitecture.example.casestudies"
 }
 
 dependencies {
     implementation("androidx.dynamicanimation:dynamicanimation:$androidxDynamicAnimationVersion")
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("com.google.android.material:material:1.5.0")
-    implementation("com.github.jeziellago:compose-markdown:0.2.9")
+    implementation("androidx.appcompat:appcompat:$androidxAppcompatVersion")
+    // implementation("com.google.android.material:material:1.6.1")
+    implementation("com.github.jeziellago:compose-markdown:0.3.0")
     implementation("androidx.compose.material:material-icons-extended:$kotlinComposeVersion")
-    implementation("com.google.accompanist:accompanist-permissions:0.23.1")
+    implementation("com.google.accompanist:accompanist-permissions:0.25.1")
 }

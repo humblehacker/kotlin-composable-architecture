@@ -1,10 +1,10 @@
 package composablearchitecture.android
 
 import androidx.compose.runtime.Stable
-import arrow.optics.Lens
-import arrow.optics.Prism
+import composablearchitecture.ActionMap
 import composablearchitecture.Reducer
 import composablearchitecture.Result
+import composablearchitecture.StateMap
 import composablearchitecture.Store
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 
 @Stable
-class ComposableStore<State, Action> private constructor(
+class ComposableStore<State, Action> internal constructor(
     val store: Store<State, Action>,
     val navigateTo: (route: String, onDismiss: () -> Unit) -> Unit,
     val popBackStack: () -> Unit
@@ -30,40 +30,40 @@ class ComposableStore<State, Action> private constructor(
     fun send(action: Action) = store.send(action)
 
     fun <LocalState, LocalAction> scope(
-        state: (State) -> LocalState,
-        action: (LocalAction) -> Action
+        stateMap: StateMap<State, LocalState>,
+        actionMap: ActionMap<Action, LocalAction>
     ): ComposableStore<LocalState, LocalAction> =
         ComposableStore(
-            store = store.scope(state, action, CoroutineScope(Dispatchers.Main)),
+            store = store.scope(stateMap, actionMap, CoroutineScope(Dispatchers.Main)),
             navigateTo = navigateTo,
             popBackStack = popBackStack
         )
+
 
     fun <LocalState, LocalAction> scope(
-        state: Lens<State, LocalState>,
-        action: Prism<Action, LocalAction>
+        toLocalState: (State) -> LocalState,
+        fromLocalAction: (LocalAction) -> Action
     ): ComposableStore<LocalState, LocalAction> =
         ComposableStore(
-            store = store.scope(state, action, CoroutineScope(Dispatchers.Main)),
+            store = store.scope(toLocalState, fromLocalAction, CoroutineScope(Dispatchers.Main)),
             navigateTo = navigateTo,
             popBackStack = popBackStack
         )
 
     fun <LocalState> scope(
-        state: (State) -> LocalState,
-    ): ComposableStore<LocalState, Action> {
-        return ComposableStore(
-            store = store.scope(state, { it }, CoroutineScope(Dispatchers.Main)),
+        stateMap: StateMap<State, LocalState>
+    ): ComposableStore<LocalState, Action> =
+        ComposableStore(
+            store = store.scope(stateMap, CoroutineScope(Dispatchers.Main)),
             navigateTo = navigateTo,
             popBackStack = popBackStack
         )
-    }
 
     fun <LocalState> scope(
-        state: Lens<State, LocalState>
+        toLocalState: (State) -> LocalState,
     ): ComposableStore<LocalState, Action> {
         return ComposableStore(
-            store = store.scope(state, CoroutineScope(Dispatchers.Main)),
+            store = store.scope(toLocalState, { it }, CoroutineScope(Dispatchers.Main)),
             navigateTo = navigateTo,
             popBackStack = popBackStack
         )

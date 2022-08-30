@@ -1,6 +1,5 @@
 package composablearchitecture.example.search
 
-import arrow.core.Either
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.runBlocking
@@ -43,9 +42,9 @@ private interface WeatherClientApi {
 
 interface WeatherClient {
 
-    var searchLocation: suspend (String) -> Either<Throwable, List<Location>>
+    var searchLocation: suspend (String) -> kotlin.Result<List<Location>>
 
-    var weather: suspend (Int) -> Either<Throwable, LocationWeather>
+    var weather: suspend (Int) -> kotlin.Result<LocationWeather>
 }
 
 class LiveWeatherClient(executor: ExecutorService? = null) : WeatherClient {
@@ -70,14 +69,14 @@ class LiveWeatherClient(executor: ExecutorService? = null) : WeatherClient {
         httpClient.dispatcher.executorService.shutdown()
     }
 
-    override var searchLocation: suspend (String) -> Either<Throwable, List<Location>> = { query ->
-        Either.catch {
+    override var searchLocation: suspend (String) -> kotlin.Result<List<Location>> = { query ->
+        kotlin.Result.runCatching {
             weatherClientApi.search(query)
         }
     }
 
-    override var weather: suspend (Int) -> Either<Throwable, LocationWeather> = { id ->
-        Either.catch {
+    override var weather: suspend (Int) -> kotlin.Result<LocationWeather> = { id ->
+        kotlin.Result.runCatching {
             weatherClientApi.weather(id)
         }
     }
@@ -87,11 +86,11 @@ fun main() {
     runBlocking {
         val client = LiveWeatherClient()
         client.searchLocation("San").fold(
-            { error -> println(error.message) },
             { locations ->
                 val weather = client.weather(locations[0].id)
                 println(weather)
-            }
+            },
+            { error -> println(error.message) }
         )
         client.shutdown()
     }

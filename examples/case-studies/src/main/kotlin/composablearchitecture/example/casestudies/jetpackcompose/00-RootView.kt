@@ -31,8 +31,8 @@ fun RootView(navController: NavHostController, store: ComposableStore<RootState,
 
         loadThenNavigateGraph(
             store = store.scope(
-                state = RootState.loadThenNavigate,
-                action = RootAction.loadThenNavigateAction
+                toLocalState = { it.loadThenNavigate },
+                fromLocalAction = { RootAction.NavigateAndLoad(it) }
             )
         )
 
@@ -115,8 +115,8 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
             CounterDemoView(
                 title = "Counter Demo",
                 store.scope(
-                    state = RootState.counter,
-                    action = RootAction.counterAction
+                    toLocalState = { it.counter },
+                    fromLocalAction = { RootAction.Counter(it) }
                 )
             )
         }
@@ -128,8 +128,8 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
             TwoCountersView(
                 title = "Two counter Demo",
                 store.scope(
-                    state = RootState.twoCounters,
-                    action = RootAction.twoCountersAction
+                    toLocalState = { it.twoCounters },
+                    fromLocalAction = { RootAction.TwoCounters(it) }
                 )
             )
         }
@@ -141,8 +141,8 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
             ListBasicsView(
                 title = "List Basics Demo",
                 store.scope(
-                    state = RootState.listBasics,
-                    action = RootAction.listBasicsAction
+                    toLocalState = { it.listBasics },
+                    fromLocalAction = { RootAction.ListBasics(it) }
                 )
             )
         }
@@ -154,8 +154,8 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
             BindingBasicsView(
                 title = "Bindings basics",
                 store.scope(
-                    state = RootState.bindingBasics,
-                    action = RootAction.bindingBasicsAction
+                    toLocalState = { it.bindingBasics },
+                    fromLocalAction = { RootAction.BindingBasics(it) }
                 )
             )
         }
@@ -172,8 +172,8 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
             OptionalBasicsView(
                 title = "Optional state",
                 store.scope(
-                    state = RootState.optionalBasics,
-                    action = RootAction.optionalBasicsAction
+                    toLocalState = { it.optionalBasics },
+                    fromLocalAction = { RootAction.OptionalBasics(it) }
                 )
             )
         }
@@ -185,8 +185,8 @@ val gettingStartedCaseStudies: List<CaseStudy> = listOf(
             AlertAndConfirmationDialogView(
                 title = "Alerts & Confirmation Dialogs",
                 store.scope(
-                    state = RootState.alertAndConfirmationDialog,
-                    action = RootAction.alertAndConfirmationDialogAction
+                    toLocalState = { it.alertAndConfirmationDialog },
+                    fromLocalAction = { RootAction.AlertAndConfirmationDialog(it) }
                 )
             )
         }
@@ -201,8 +201,8 @@ val effectsCaseStudies: List<CaseStudy> = listOf(
             EffectsBasicsView(
                 title = "Basics",
                 store = store.scope(
-                    state = RootState.effectsBasics,
-                    action = RootAction.effectsBasicsAction
+                    toLocalState = { it.effectsBasics },
+                    fromLocalAction = { RootAction.EffectsBasics(it) }
                 )
             )
         }
@@ -214,8 +214,8 @@ val effectsCaseStudies: List<CaseStudy> = listOf(
             EffectsCancellationView(
                 title = "Effect cancellation",
                 store = store.scope(
-                    state = RootState.effectsCancellation,
-                    action = RootAction.effectsCancellationAction
+                    toLocalState = { it.effectsCancellation },
+                    fromLocalAction = { RootAction.EffectsCancellation(it) }
                 )
             )
         }
@@ -227,8 +227,8 @@ val effectsCaseStudies: List<CaseStudy> = listOf(
             LongLivingEffectsView(
                 title = "Long-living effects",
                 store = store.scope(
-                    state = RootState.longLivingEffects,
-                    action = RootAction.longLivingEffectsAction
+                    toLocalState = { it.longLivingEffects },
+                    fromLocalAction = { RootAction.LongLivingEffects(it) }
                 )
             )
         }
@@ -243,8 +243,8 @@ val navigationCaseStudies: List<CaseStudy> = listOf(
             LoadThenNavigateView(
                 title = "Load then navigate",
                 store = store.scope(
-                    state = RootState.loadThenNavigate,
-                    action = RootAction.loadThenNavigateAction
+                    toLocalState = { it.loadThenNavigate },
+                    fromLocalAction = { RootAction.NavigateAndLoad(it) }
                 )
             )
         }

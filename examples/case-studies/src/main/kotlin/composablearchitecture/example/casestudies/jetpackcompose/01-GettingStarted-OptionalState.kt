@@ -9,11 +9,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import arrow.core.left
-import arrow.core.right
-import arrow.optics.Prism
-import arrow.optics.optics
+import composablearchitecture.ActionMap
 import composablearchitecture.Reducer
+import composablearchitecture.StateMap
 import composablearchitecture.android.ComposableStore
 import composablearchitecture.android.IfLetStore
 import composablearchitecture.android.WithViewStore
@@ -34,13 +32,17 @@ Tapping "Toggle counter state" will flip between the `nil` and non-`nil` counter
 """.replace("\\\n", "")
 }
 
-@optics
 @Parcelize
 @Immutable
 data class OptionalBasicsState(
     val optionalCounter: CounterState? = null
 ) : Parcelable {
-    companion object
+    companion object {
+        val optionalCounterState = StateMap<OptionalBasicsState, CounterState?>(
+            toLocal = { it.optionalCounter },
+            fromLocal = { ls, gs -> gs.copy(optionalCounter = ls) }
+        )
+    }
 }
 
 sealed class OptionalBasicsAction {
@@ -48,14 +50,9 @@ sealed class OptionalBasicsAction {
     object ToggleCounterButtonTapped : OptionalBasicsAction()
 
     companion object {
-        val optionalCounterAction: Prism<OptionalBasicsAction, CounterAction> = Prism(
-            getOrModify = { obAction ->
-                when (obAction) {
-                    is OptionalCounter -> obAction.action.right()
-                    else -> obAction.left()
-                }
-            },
-            reverseGet = { action -> OptionalCounter(action) }
+        val optionalCounterAction = ActionMap<OptionalBasicsAction, CounterAction>(
+            toLocal = { if (it is OptionalCounter) it.action else null },
+            fromLocal = { action -> OptionalCounter(action) }
         )
     }
 }
@@ -66,8 +63,8 @@ val optionalBasicsReducer =
     counterReducer
         .optional()
         .pullback(
-            toLocalState = OptionalBasicsState.nullableOptionalCounter,
-            toLocalAction = OptionalBasicsAction.optionalCounterAction,
+            stateMap = OptionalBasicsState.optionalCounterState,
+            actionMap = OptionalBasicsAction.optionalCounterAction,
             toLocalEnvironment = { _: OptionalBasicsEnvironment -> CounterEnvironment() }
         )
         .combine(
@@ -116,9 +113,9 @@ fun OptionalBasicsView(
 
                         Column(modifier = Modifier.padding(8.dp)) {
                             IfLetStore(
-                                store.scope(
-                                    state = OptionalBasicsState.nullableOptionalCounter,
-                                    action = OptionalBasicsAction.optionalCounterAction
+                                store.scope<CounterState?, CounterAction>(
+                                    toLocalState = { it.optionalCounter },
+                                    fromLocalAction = { OptionalBasicsAction.OptionalCounter(it) }
                                 ),
                                 then = { store ->
                                     MarkdownText("`CounterState` is non-`null`")

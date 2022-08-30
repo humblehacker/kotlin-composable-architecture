@@ -1,7 +1,5 @@
 package composablearchitecture.example.search
 
-import arrow.core.Either
-import arrow.optics.optics
 import composablearchitecture.Reducer
 import composablearchitecture.Result
 import composablearchitecture.cancel
@@ -11,7 +9,6 @@ import composablearchitecture.withEffect
 import composablearchitecture.withNoEffect
 import kotlinx.coroutines.delay
 
-@optics
 data class SearchState(
     val locations: List<Location> = emptyList(),
     val locationWeather: LocationWeather? = null,
@@ -22,9 +19,9 @@ data class SearchState(
 }
 
 sealed class SearchAction : Comparable<SearchAction> {
-    data class LocationsResponse(val result: Either<Throwable, List<Location>>) : SearchAction()
+    data class LocationsResponse(val result: kotlin.Result<List<Location>>) : SearchAction()
     data class LocationTapped(val location: Location) : SearchAction()
-    data class LocationWeatherResponse(val result: Either<Throwable, LocationWeather>) : SearchAction()
+    data class LocationWeatherResponse(val result: kotlin.Result<LocationWeather>) : SearchAction()
     data class SearchQueryChanged(val query: String) : SearchAction()
 
     override fun compareTo(other: SearchAction): Int = this.compareTo(other)
@@ -43,11 +40,11 @@ val searchReducer = Reducer<SearchState, SearchAction, SearchEnvironment> { stat
 
 private fun SearchAction.LocationsResponse.handle(state: SearchState): Result<SearchState, SearchAction> =
     result.fold(
+        { locations -> state.copy(locations = locations).withNoEffect() },
         { error ->
             println(error.message)
             state.copy(locations = emptyList()).withNoEffect()
-        },
-        { locations -> state.copy(locations = locations).withNoEffect() }
+        }
     )
 
 private fun SearchAction.LocationTapped.handle(
@@ -85,15 +82,15 @@ private fun SearchAction.SearchQueryChanged.handle(
 
 private fun SearchAction.LocationWeatherResponse.handle(state: SearchState): Result<SearchState, SearchAction> =
     result.fold(
+        { locationWeather ->
+            state
+                .copy(locationWeather = locationWeather, locationWeatherRequestInFlight = null)
+                .withNoEffect()
+        },
         { error ->
             println(error.message)
             state
                 .copy(locationWeather = null, locationWeatherRequestInFlight = null)
-                .withNoEffect()
-        },
-        { locationWeather ->
-            state
-                .copy(locationWeather = locationWeather, locationWeatherRequestInFlight = null)
                 .withNoEffect()
         }
     )

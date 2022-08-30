@@ -4,12 +4,10 @@ package composablearchitecture.example.casestudies.jetpackcompose
 import android.content.Context
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
-import arrow.core.left
-import arrow.core.right
-import arrow.optics.Prism
-import arrow.optics.optics
+import composablearchitecture.ActionMap
 import composablearchitecture.Effect
 import composablearchitecture.Reducer
+import composablearchitecture.StateMap
 import composablearchitecture.debug
 import composablearchitecture.example.casestudies.jetpackcompose.extras.ScreenshotDetector
 import composablearchitecture.withNoEffect
@@ -17,7 +15,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.parcelize.Parcelize
 
-@optics
 @Parcelize
 @Immutable
 data class RootState(
@@ -32,7 +29,48 @@ data class RootState(
     val twoCounters: TwoCountersState = TwoCountersState(),
     val listBasics: ListBasicsState = ListBasicsState(),
 ) : Parcelable {
-    companion object
+    companion object {
+        val alertAndConfirmationDialogStateMap = StateMap<RootState, AlertAndConfirmationDialogState>(
+            toLocal = { it.alertAndConfirmationDialog },
+            fromLocal = { ls, gs -> gs.copy(alertAndConfirmationDialog = ls) }
+        )
+        val bindingBasicsState = StateMap<RootState, BindingBasicsState> (
+            toLocal = { it.bindingBasics },
+            fromLocal = { ls, gs -> gs.copy(bindingBasics = ls) }
+        )
+        val counterState: StateMap<RootState, CounterState> = StateMap(
+            toLocal = { it.counter },
+            fromLocal = { ls, gs -> gs.copy(counter = ls) }
+        )
+        val effectsBasicsState: StateMap<RootState, EffectsBasicsState> = StateMap(
+            toLocal = { it.effectsBasics },
+            fromLocal = { ls, gs -> gs.copy(effectsBasics = ls) }
+        )
+        val effectsCancellationState: StateMap<RootState, EffectsCancellationState> = StateMap(
+            toLocal = { it.effectsCancellation },
+            fromLocal = { ls, gs -> gs.copy(effectsCancellation = ls) }
+        )
+        val longLivingEffectsState: StateMap<RootState, LongLivingEffectsState> = StateMap(
+            toLocal = { it.longLivingEffects },
+            fromLocal = { ls, gs -> gs.copy(longLivingEffects = ls) }
+        )
+        val loadThenNavigateState: StateMap<RootState, LoadThenNavigateState> = StateMap(
+            toLocal = { it.loadThenNavigate },
+            fromLocal = { ls, gs -> gs.copy(loadThenNavigate = ls) }
+        )
+        val optionalBasicsState: StateMap<RootState, OptionalBasicsState> = StateMap(
+            toLocal = { it.optionalBasics },
+            fromLocal = { ls, gs -> gs.copy(optionalBasics = ls) }
+        )
+        val twoCountersState: StateMap<RootState, TwoCountersState> = StateMap(
+            toLocal = { it.twoCounters },
+            fromLocal = { ls, gs -> gs.copy(twoCounters = ls) }
+        )
+        val listBasicsState: StateMap<RootState, ListBasicsState> = StateMap(
+            toLocal = { it.listBasics },
+            fromLocal = { ls, gs -> gs.copy(listBasics = ls) }
+        )
+    }
 }
 
 sealed class RootAction {
@@ -63,116 +101,46 @@ sealed class RootAction {
     }
 
     companion object {
-        val alertAndConfirmationDialogAction: Prism<RootAction, AlertAndConfirmationDialogAction> =
-            Prism(
-                getOrModify = { rootAction ->
-                    when (rootAction) {
-                        is AlertAndConfirmationDialog -> rootAction.action.right()
-                        else -> rootAction.left()
-                    }
-                },
-                reverseGet = { action ->
-                    AlertAndConfirmationDialog(action = action)
-                }
+        val alertAndConfirmationDialogAction: ActionMap<RootAction, AlertAndConfirmationDialogAction> =
+            ActionMap(
+                toLocal = { if (it is AlertAndConfirmationDialog) it.action else null },
+                fromLocal = { AlertAndConfirmationDialog(it) }
             )
-        val bindingBasicsAction: Prism<RootAction, BindingBasicsAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is BindingBasics -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                BindingBasics(action = action)
-            }
+        val bindingBasicsAction: ActionMap<RootAction, BindingBasicsAction> = ActionMap(
+            toLocal = { if (it is BindingBasics) it.action else null },
+            fromLocal = { BindingBasics(action = it) }
         )
-        val counterAction: Prism<RootAction, CounterAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is Counter -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                Counter(action = action)
-            }
+        val counterAction: ActionMap<RootAction, CounterAction> = ActionMap(
+            toLocal = { if (it is Counter) it.action else null },
+            fromLocal = { Counter(it) }
         )
-        val effectsBasicsAction: Prism<RootAction, EffectsBasicsAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is EffectsBasics -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                EffectsBasics(action = action)
-            }
+        val effectsBasicsAction: ActionMap<RootAction, EffectsBasicsAction> = ActionMap(
+            toLocal = { if (it is EffectsBasics) it.action else null },
+            fromLocal = { EffectsBasics(it) }
         )
-        val effectsCancellationAction: Prism<RootAction, EffectsCancellationAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is EffectsCancellation -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                EffectsCancellation(action = action)
-            }
+        val effectsCancellationAction: ActionMap<RootAction, EffectsCancellationAction> = ActionMap(
+            toLocal = { if (it is EffectsCancellation) it.action else null },
+            fromLocal = { EffectsCancellation(it) }
         )
-        val longLivingEffectsAction: Prism<RootAction, LongLivingEffectsAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is LongLivingEffects -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                LongLivingEffects(action = action)
-            }
+        val longLivingEffectsAction: ActionMap<RootAction, LongLivingEffectsAction> = ActionMap(
+            toLocal = { if (it is LongLivingEffects) it.action else null },
+            fromLocal = { LongLivingEffects(it) }
         )
-        val loadThenNavigateAction: Prism<RootAction, LoadThenNavigateAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is NavigateAndLoad -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                NavigateAndLoad(action = action)
-            }
+        val loadThenNavigateAction: ActionMap<RootAction, LoadThenNavigateAction> = ActionMap(
+            toLocal = { if (it is NavigateAndLoad) it.action else null },
+            fromLocal = { NavigateAndLoad(it) }
         )
-        val optionalBasicsAction: Prism<RootAction, OptionalBasicsAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is OptionalBasics -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                OptionalBasics(action = action)
-            }
+        val optionalBasicsAction: ActionMap<RootAction, OptionalBasicsAction> = ActionMap(
+            toLocal = { if (it is OptionalBasics) it.action else null },
+            fromLocal = { OptionalBasics(it) }
         )
-        val twoCountersAction: Prism<RootAction, TwoCountersAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is TwoCounters -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                TwoCounters(action = action)
-            }
+        val twoCountersAction: ActionMap<RootAction, TwoCountersAction> = ActionMap(
+            toLocal = { if (it is TwoCounters) it.action else null },
+            fromLocal = { TwoCounters(it) }
         )
-        val listBasicsAction: Prism<RootAction, ListBasicsAction> = Prism(
-            getOrModify = { rootAction ->
-                when (rootAction) {
-                    is ListBasics -> rootAction.action.right()
-                    else -> rootAction.left()
-                }
-            },
-            reverseGet = { action ->
-                ListBasics(action = action)
-            }
+        val listBasicsAction: ActionMap<RootAction, ListBasicsAction> = ActionMap(
+            toLocal = { if (it is ListBasics) it.action else null },
+            fromLocal = { ListBasics(it) }
         )
     }
 }
@@ -195,59 +163,62 @@ fun RootEnvironment.Companion.live(applicationContext: Context): RootEnvironment
 }
 
 val rootReducer = Reducer.combine<RootState, RootAction, RootEnvironment>(
-    Reducer { state, action, _ ->
+    Reducer { state: RootState, action: RootAction, _: RootEnvironment ->
         when (action) {
             else -> state.withNoEffect()
         }
     },
     alertAndConfirmationDialogReducer.pullback(
-        toLocalState = RootState.alertAndConfirmationDialog,
-        toLocalAction = RootAction.alertAndConfirmationDialogAction,
+        stateMap = StateMap(
+            toLocal = { it.alertAndConfirmationDialog },
+            fromLocal = { ls, gs -> gs.copy(alertAndConfirmationDialog = ls) }
+        ),
+        actionMap = RootAction.alertAndConfirmationDialogAction,
         toLocalEnvironment = { AlertAndConfirmationDialogEnvironment() }
     ),
     bindingBasicsReducer.pullback(
-        toLocalState = RootState.bindingBasics,
-        toLocalAction = RootAction.bindingBasicsAction,
+        stateMap = RootState.bindingBasicsState,
+        actionMap = RootAction.bindingBasicsAction,
         toLocalEnvironment = { BindingBasicsEnvironment() }
     ),
     counterReducer.pullback(
-        toLocalState = RootState.counter,
-        toLocalAction = RootAction.counterAction,
+        stateMap = RootState.counterState,
+        actionMap = RootAction.counterAction,
         toLocalEnvironment = { CounterEnvironment() }
     ),
     effectsBasicsReducer.pullback(
-        toLocalState = RootState.effectsBasics,
-        toLocalAction = RootAction.effectsBasicsAction,
+        stateMap = RootState.effectsBasicsState,
+        actionMap = RootAction.effectsBasicsAction,
         toLocalEnvironment = { EffectsBasicsEnvironment(it.fact) }
     ),
     effectsCancellationReducer.pullback(
-        toLocalState = RootState.effectsCancellation,
-        toLocalAction = RootAction.effectsCancellationAction,
+        stateMap = RootState.effectsCancellationState,
+        actionMap = RootAction.effectsCancellationAction,
         toLocalEnvironment = { EffectsCancellationEnvironment(it.fact) }
     ),
     longLivingEffectsReducer.pullback(
-        toLocalState = RootState.longLivingEffects,
-        toLocalAction = RootAction.longLivingEffectsAction,
+        stateMap = RootState.longLivingEffectsState,
+        actionMap = RootAction.longLivingEffectsAction,
         toLocalEnvironment = { LongLivingEffectsEnvironment(it.userDidTakeScreenshot) }
     ),
     loadThenNavigateReducer.pullback(
-        toLocalState = RootState.loadThenNavigate,
-        toLocalAction = RootAction.loadThenNavigateAction,
+        stateMap = RootState.loadThenNavigateState,
+        actionMap = RootAction.loadThenNavigateAction,
         toLocalEnvironment = { LoadThenNavigateEnvironment() }
     ),
     optionalBasicsReducer.pullback(
-        toLocalState = RootState.optionalBasics,
-        toLocalAction = RootAction.optionalBasicsAction,
+        stateMap = RootState.optionalBasicsState,
+        actionMap = RootAction.optionalBasicsAction,
         toLocalEnvironment = { OptionalBasicsEnvironment() }
     ),
     twoCountersReducer.pullback(
-        toLocalState = RootState.twoCounters,
-        toLocalAction = RootAction.twoCountersAction,
+        stateMap = RootState.twoCountersState,
+        actionMap = RootAction.twoCountersAction,
         toLocalEnvironment = { TwoCountersEnvironment() }
     ),
     listBasicsReducer.pullback(
-        toLocalState = RootState.listBasics,
-        toLocalAction = RootAction.listBasicsAction,
+        stateMap = RootState.listBasicsState,
+        actionMap = RootAction.listBasicsAction,
         toLocalEnvironment = { ListBasicsEnvironment() }
     ),
 ).debug()

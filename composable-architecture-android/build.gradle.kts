@@ -12,7 +12,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.1"
+        kotlinCompilerExtensionVersion = kotlinComposeCompilerVersion
     }
     namespace = "composablearchitecture.android"
     defaultConfig {
@@ -47,8 +47,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion")
-
-    implementation("io.arrow-kt:arrow-optics:$arrowVersion")
 
     api(project(":composable-architecture"))
 

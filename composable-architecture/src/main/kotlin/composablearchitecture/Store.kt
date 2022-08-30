@@ -1,7 +1,5 @@
 package composablearchitecture
 
-import arrow.optics.Lens
-import arrow.optics.Prism
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +33,18 @@ class Store<State, Action> constructor(
     }
 
     fun <LocalState, LocalAction> scope(
+        stateMap: StateMap<State, LocalState>,
+        actionMap: ActionMap<Action, LocalAction>,
+        coroutineScope: CoroutineScope
+    ): Store<LocalState, LocalAction> {
+        return scope(
+            toLocalState = stateMap.toLocal,
+            fromLocalAction = actionMap.fromLocal,
+            coroutineScope = coroutineScope
+        )
+    }
+
+    fun <LocalState, LocalAction> scope(
         toLocalState: (State) -> LocalState,
         fromLocalAction: (LocalAction) -> Action,
         coroutineScope: CoroutineScope
@@ -55,14 +65,12 @@ class Store<State, Action> constructor(
         return localStore
     }
 
-    fun <LocalState, LocalAction> scope(
-        toLocalState: Lens<State, LocalState>,
-        fromLocalAction: Prism<Action, LocalAction>,
+    fun <LocalState> scope(
+        stateMap: StateMap<State, LocalState>,
         coroutineScope: CoroutineScope
-    ): Store<LocalState, LocalAction> {
+    ): Store<LocalState, Action> {
         return scope(
-            toLocalState = { state -> toLocalState.get(state) },
-            fromLocalAction = { action -> fromLocalAction.reverseGet(action) },
+            toLocalState = stateMap.toLocal,
             coroutineScope = coroutineScope
         )
     }
@@ -78,15 +86,6 @@ class Store<State, Action> constructor(
         )
     }
 
-    fun <LocalState> scope(
-        toLocalState: Lens<State, LocalState>,
-        coroutineScope: CoroutineScope
-    ): Store<LocalState, Action> {
-        return scope(
-            toLocalState = { state -> toLocalState.get(state) },
-            coroutineScope = coroutineScope
-        )
-    }
 
     fun send(action: Action) {
         val currentThread = Thread.currentThread()
